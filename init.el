@@ -7,20 +7,7 @@
 
 (setq mac-option-modifier  'meta)
 (setq mac-command-modifier 'hyper)
-
-(global-set-key [(hyper a)] 'mark-whole-buffer)
-(global-set-key [(hyper v)] 'yank)
-(global-set-key [(hyper c)] 'kill-ring-save)
-(global-set-key [(hyper s)] 'save-buffer)
-(global-set-key [(hyper l)] 'goto-line)
-(global-set-key [(hyper w)]
-                (lambda () (interactive) (delete-window)))
-(global-set-key [(hyper z)] 'undo)
 (global-set-key [(hyper q)] 'save-buffers-kill-terminal)
-
-(setq package-archives
-      '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-        ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
 
 (menu-bar-mode -1)
 (tool-bar-mode -1)
@@ -28,81 +15,44 @@
 
 (column-number-mode t)
 (line-number-mode t)
-
-;; (setq inhibit-splash-screen t)
-(fset 'yes-or-no-p'y-or-n-p)
 (show-paren-mode t)
 (global-auto-revert-mode t)
-(setq auto-save-default nil)
-(set-frame-font "Fira Code-20")
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-(load-theme 'solarized-light t)
+(global-hl-line-mode t)
 
+(fset 'yes-or-no-p'y-or-n-p)
+
+(set-frame-font "Fira Code-20")
+(load-theme 'sanityinc-solarized-light t)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+(setq split-height-threshold nil)
+(setq split-width-threshold 0)
+(setq auto-save-default nil)
 (setq scroll-margin 3
       scroll-preserve-screen-position t)
 
-(global-hl-line-mode t)
-(which-function-mode)
+(setq-default python-shell-interpreter "python"
+              indent-tabs-mode nil
+              c-basic-offset 4
+              c-default-style "linux"
+              default-tab-width 4)
 
-(setq python-shell-interpreter "python")
-(setq-default indent-tabs-mode nil)
-(setq c-basic-offset 4)
-(setq c-default-style "linux")
-(setq default-tab-width 4)
-
-(defun open-init-file()
-  (interactive)
-  (find-file "~/.emacs.d/init.el"))
+(setq-default package-archives
+      '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+        ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
 
 (eval-when-compile
   (require 'use-package))
 (setq use-package-verbose t)
 
-(use-package diminish
-  :diminish (visual-line-mode . "ω")
-  :diminish hs-minor-mode
-  :diminish abbrev-mode)
-
 (use-package subword
   :diminish superword-mode
   :config (global-superword-mode t))
 
-(use-package ace-window
-    :defer 1
-    :bind* ("M-o" . ace-window)
-    :config
-    (set-face-attribute
-     'aw-leading-char-face nil
-     :foreground "deep sky blue"
-     :weight 'bold
-     :height 3.0)
-    ;; (set-face-attribute
-    ;;  'aw-mode-line-face nil
-    ;;  :inherit 'mode-line-buffer-id
-    ;;  :foreground "lawn green")
-    (setq aw-keys '(?a ?s ?d ?f ?j ?k ?l)
-          aw-dispatch-always t
-          aw-dispatch-alist
-          '((?x aw-delete-window "Ace - Delete Window")
-            (?c aw-swap-window "Ace - Swap Window")
-            (?n aw-flip-window)
-            (?v aw-split-window-vert "Ace - Split Vert Window")
-            (?h aw-split-window-horz "Ace - Split Horz Window")
-            (?m delete-other-windows "Ace - Maximize Window")
-            (?g delete-other-windows)
-            (?b balance-windows)
-            (?u (lambda ()
-                  (progn
-                    (winner-undo)
-                    (setq this-command 'winner-undo))))
-            (?r winner-redo)))
-    (ace-window-display-mode t))
-
 (use-package counsel
   :bind (("M-x"     . counsel-M-x)
          ("C-x c f" . counsel-find-file)
-         ("C-x b"   . counsel-ibuffer)
-         ("C-x c b" . counsel-bookmark)))
+         ("C-x b"   . counsel-switch-buffer)))
 
 (use-package swiper
   :bind ("C-s" . swiper))
@@ -115,18 +65,13 @@
   :bind (("M-c" . avy-goto-char)
          ("M-s" . avy-goto-word-1)))
 
-
 (use-package eglot
-  :hook (rust-mode . eglot-ensure)
-  :hook (python-mode . eglot-ensure))
+  :hook ((rust-mode . eglot-ensure)
+         (python-mode . eglot-ensure)
+         (c-mode . eglot-ensure)))
 
 (use-package flymake
   :hook (prog-mode . flymake-mode))
-
-(use-package flymake-diagnostic-at-point
-  :after flymake
-  :hook  (flymake-mode . flymake-diagnostic-at-point-mode)
-  :config)
 
 (use-package company
   :hook (prog-mode . company-mode)
@@ -154,17 +99,26 @@
   :bind
   ("C-c C-k" . rust-run))
 
+(use-package recentf
+  :config
+  (recentf-mode 1))
+
+(use-package yasnippet
+  :config
+  (yas-global-mode))
+
+(use-package hungry-delete
+  :config
+  (global-hungry-delete-mode))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" default)))
  '(package-selected-packages
    (quote
-    (ace-window solarized-theme wgrep smex counsel avy magit racket-mode sudo-edit use-package org diminish eglot flymake-diagnostic-at-point rust-mode undo-tree company))))
+    (eglot hungry-delete yasnippet-snippets color-theme-sanityinc-solarized wgrep smex counsel avy sudo-edit use-package diminish rust-mode undo-tree company))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
