@@ -3,23 +3,22 @@
 ;;; Code:
 
 (package-initialize)
-(setq-default package-archives
-      '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-        ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
-(add-to-list 'load-path (expand-file-name "~/.emacs.d/site-lisp/snails"))
+
+(setq package-archives '(("local"   . "~/.emacs.d/elpa-local/")))
 
 (menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode 0)
 (column-number-mode t)
 (line-number-mode t)
-(set-frame-font "Fira Code-20")
 (setq inhibit-startup-screen t)
 (setq initial-scratch-message nil)
 (setq initial-major-mode 'text-mode)
-(load-theme 'eziam-light t)
-(set-background-color "#c9cfcf")
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+
+;; (tool-bar-mode -1)
+;; (scroll-bar-mode 0)
+;; (load-theme 'eziam-light t)
+;; (set-background-color "#c9cfcf")
+;; (set-frame-font "Fira Code-20")
+;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 
 (show-paren-mode t)
 (global-auto-revert-mode t)
@@ -31,13 +30,10 @@
 (setq scroll-margin 3
       scroll-preserve-screen-position t)
 
-(setq-default indent-tabs-mode nil
-              c-basic-offset 4
-              c-default-style "linux"
-              default-tab-width 4)
-
-(require 'exec-path-from-shell)
-(exec-path-from-shell-initialize)
+(setq dired-listing-switches "-alGgh --group-directories-first --time-style \"+%m-%d %H:%M\"")
+(setq directory-listing-before-filename-regexp
+      (purecopy (concat "\\([0-2][0-9]:[0-5][0-9] \\)\\|"
+			directory-listing-before-filename-regexp)))
 
 (require 'ivy)
 (setq ivy-initial-inputs-alist nil)
@@ -57,6 +53,7 @@
 (recentf-mode 1)
 (setq recentf-max-menu-items 20)
 (setq recentf-max-saved-items 20)
+(add-to-list 'recentf-exclude "\\.el\\'")
 
 (require 'undo-tree)
 (add-hook 'after-init-hook 'global-undo-tree-mode)
@@ -69,9 +66,7 @@
 (setq company-idle-delay 0.2)
 (setq company-minimum-prefix-length 2)
 (setq company-tooltip-limit 20)
-
-(require 'company-tabnine)
-(add-to-list 'company-backends #'company-tabnine)
+(setq company-backends (delete 'company-clang company-backends))
 
 (require 'diminish)
 (eval-after-load 'undo-tree
@@ -86,14 +81,16 @@
   '(diminish 'subword-mode))
 (diminish 'eldoc-mode)
 
+(require 'eglot)
+(add-to-list 'eglot-server-programs
+	     '((c++-mode c-mode) "clangd"))
+(add-hook 'c-mode-hook 'eglot-ensure)
+
 ;; common settings for prog mode
 (add-hook 'prog-mode-hook 'company-mode)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 (add-hook 'prog-mode-hook 'subword-mode)
 (add-hook 'prog-mode-hook 'hungry-delete-mode)
-
-;; some setting for rust-mode
-
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -101,8 +98,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   (quote
-    (symbol-overlay yasnippet-snippets undo-tree smex rust-mode magit hungry-delete eziam-theme exec-path-from-shell diminish counsel company-tabnine bind-key avy))))
+   '(magit company fd-dired eglot counsel ivy smex swiper symbol-overlay yasnippet hungry-delete avy diminish cmake-mode undo-tree bind-key)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
