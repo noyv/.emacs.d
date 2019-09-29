@@ -35,6 +35,23 @@
       (purecopy (concat "\\([0-2][0-9]:[0-5][0-9] \\)\\|"
 			directory-listing-before-filename-regexp)))
 
+(require 'evil-leader)
+(global-evil-leader-mode)
+(evil-leader/set-leader ",")
+(evil-leader/set-key
+ "f" 'counsel-find-file
+ "b" 'counsel-switch-buffer
+ "k" 'kill-buffer
+ "r" 'counsel-recentf)
+(setq evil-leader/no-prefix-mode-rx '("magit-.*-mode" "gnus-.*-mode"))
+
+(require 'evil)
+(evil-mode 1)
+
+(require 'keyfreq)
+(keyfreq-mode 1)
+(keyfreq-autosave-mode 1)
+
 (require 'ivy)
 (setq ivy-initial-inputs-alist nil)
 (setq ivy-use-virtual-buffers t)
@@ -45,9 +62,6 @@
 (bind-key* "C-c c"   'counsel-compile)
 (bind-key* "C-s"     'swiper)
 (bind-key* "C-c C-r" 'ivy-resume)
-
-(require 'avy)
-(bind-key* "M-c" 'avy-goto-char)
 
 (require 'recentf)
 (recentf-mode 1)
@@ -98,7 +112,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(magit company fd-dired eglot counsel ivy smex swiper symbol-overlay yasnippet hungry-delete avy diminish cmake-mode undo-tree bind-key)))
+   '(keyfreq evil-leader evil company fd-dired eglot counsel ivy smex symbol-overlay yasnippet hungry-delete diminish cmake-mode undo-tree bind-key)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
