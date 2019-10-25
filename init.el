@@ -20,10 +20,12 @@
 ;; (set-frame-font "Fira Code-20")
 ;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 
+(add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
 (show-paren-mode t)
 (global-auto-revert-mode t)
 (global-hl-line-mode t)
 (fset 'yes-or-no-p'y-or-n-p)
+(setq make-backup-files nil)
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
 (setq auto-save-default nil)
@@ -35,18 +37,37 @@
       (purecopy (concat "\\([0-2][0-9]:[0-5][0-9] \\)\\|"
 			directory-listing-before-filename-regexp)))
 
+(unbind-key "C-s")
+
 (require 'evil-leader)
 (global-evil-leader-mode)
 (evil-leader/set-leader ",")
 (evil-leader/set-key
- "f" 'counsel-find-file
- "b" 'counsel-switch-buffer
- "k" 'kill-buffer
- "r" 'counsel-recentf)
+ "ff" 'counsel-find-file
+ "fr" 'counsel-recentf
+ "bb" 'counsel-switch-buffer
+ "bk" 'kill-buffer
+ "ci" 'evilnc-comment-or-uncomment-lines
+ "cl" 'evilnc-quick-comment-or-uncomment-to-the-line
+ "cc" 'evilnc-copy-and-comment-lines
+ "cp" 'evilnc-comment-or-uncomment-paragraphs
+ "cr" 'comment-or-uncomment-region
+ "cv" 'evilnc-toggle-invert-comment-line-by-line
+ "."  'evilnc-copy-and-comment-operator)
 (setq evil-leader/no-prefix-mode-rx '("magit-.*-mode" "gnus-.*-mode"))
 
 (require 'evil)
 (evil-mode 1)
+
+(modify-syntax-entry ?_ "w")
+(define-key evil-normal-state-map (kbd "*")
+  (lambda () (interactive) (swiper (format "\\<%s\\>" (thing-at-point 'symbol)))))
+(define-key evil-normal-state-map (kbd "#")
+      (lambda () (interactive) (swiper (format "\\<%s\\>" (thing-at-point 'word)))))
+
+(with-eval-after-load 'evil
+    (require 'evil-anzu))
+(global-anzu-mode +1)
 
 (require 'keyfreq)
 (keyfreq-mode 1)
@@ -57,11 +78,6 @@
 (setq ivy-use-virtual-buffers t)
 (setq ivy-count-format "")
 (bind-key* "M-x"     'counsel-M-x)
-(bind-key* "C-x b"   'counsel-switch-buffer)
-(bind-key* "C-x C-f" 'counsel-find-file)
-(bind-key* "C-c c"   'counsel-compile)
-(bind-key* "C-s"     'swiper)
-(bind-key* "C-c C-r" 'ivy-resume)
 
 (require 'recentf)
 (recentf-mode 1)
@@ -94,6 +110,7 @@
 (eval-after-load 'subword
   '(diminish 'subword-mode))
 (diminish 'eldoc-mode)
+(diminish 'abbrev-mode)
 
 (require 'eglot)
 (add-to-list 'eglot-server-programs
@@ -112,7 +129,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(keyfreq evil-leader evil company fd-dired eglot counsel ivy smex symbol-overlay yasnippet hungry-delete diminish cmake-mode undo-tree bind-key)))
+   '(evil-nerd-commenter evil-anzu anzu keyfreq evil-leader evil company fd-dired eglot counsel ivy smex yasnippet hungry-delete diminish undo-tree bind-key)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
