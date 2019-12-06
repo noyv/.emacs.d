@@ -10,109 +10,48 @@
 (column-number-mode t)
 (line-number-mode t)
 (setq inhibit-startup-screen t)
-(setq initial-scratch-message nil)
 (setq initial-major-mode 'text-mode)
 
 (tool-bar-mode -1)
 (scroll-bar-mode 0)
 (load-theme 'sanityinc-solarized-light t)
-(set-frame-font "Fira Code-14")
-;; (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(set-frame-font "hack-12")
 
-(add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
-(show-paren-mode t)
-(global-auto-revert-mode t)
-(global-hl-line-mode t)
-(fset 'yes-or-no-p'y-or-n-p)
 (setq make-backup-files nil)
+(global-auto-revert-mode t)
+(fset 'yes-or-no-p'y-or-n-p)
+
+(show-paren-mode t)
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
-(setq auto-save-default nil)
-(setq scroll-margin 3
-      scroll-preserve-screen-position t)
+(setq scroll-conservatively 101
+      scroll-margin 5
+      scroll-preserve-screen-position 't)
 
-(setq dired-listing-switches
-      "-alGgh --group-directories-first --time-style \"+%m-%d %H:%M\"")
-(setq directory-listing-before-filename-regexp
-      (purecopy (concat "\\([0-2][0-9]:[0-5][0-9] \\)\\|"
-			directory-listing-before-filename-regexp)))
-
-(unbind-key "C-s")
-(unbind-key "C-x C-c")
-
-(require 'ivy)
-(bind-key* "M-x" 'counsel-M-x)
+(defun my-c-mode-hook ()
+  (c-toggle-auto-hungry-state 1)
+  (c-toggle-comment-style -1))
+(add-hook 'c-mode-hook 'my-c-mode-hook)
 
 (require 'which-key)
-(which-key-mode)
+(which-key-mode t)
 
-(defvar mcfly-commands
-  '(query-replace-regexp
-    flush-lines
-    keep-lines
-    ivy-read
-    swiper
-    swiper-isearch))
-
-(defvar mcfly-back-commands
-  '(self-insert-command
-    ivy-yank-char
-    ivy-yank-word
-    ivy-yank-symbol))
-
-(defun mcfly-back-to-present ()
-  (remove-hook 'pre-command-hook 'mcfly-back-to-present t)
-  (cond ((and (memq last-command mcfly-commands)
-	      (equal (this-command-keys-vector) (kbd "M-p")))
-	 ;; repeat one time to get straight to the first history item
-	 (setq unread-command-events
-	       (append unread-command-events
-		       (listify-key-sequence (kbd "M-p")))))
-	((memq this-command mcfly-back-commands)
-	 (delete-region (point)
-			(point-max)))))
-
-(defun mcfly-time-travel ()
-  (when (memq this-command mcfly-commands)
-    (let* ((kbd (kbd "M-n"))
-	   (cmd (key-binding kbd))
-	   (future (and cmd
-			(with-temp-buffer
-			  (when (ignore-errors
-				  (call-interactively cmd) t)
-			    (buffer-string))))))
-      (when future
-	(save-excursion
-	  (insert (propertize future 'face 'shadow)))
-	(add-hook 'pre-command-hook 'mcfly-back-to-present nil t)))))
-
-;; setup code
-(add-hook 'minibuffer-setup-hook #'mcfly-time-travel)
-
-(require 'evil-leader)
-(global-evil-leader-mode)
-(evil-leader/set-leader ",")
-(evil-leader/set-key
-  "bb" 'counsel-buffer-or-recentf
-  "bl" (lambda ()
-	 (interactive)
-	 (switch-to-buffer nil))
-  "bk" 'kill-buffer
-  "ej" 'flymake-goto-next-error
-  "ek" 'flymake-goto-prev-error
-  "ff" '(lambda()
-	  (interactive)
-	  (let ((current-prefix-arg 4))
-	    (call-interactively 'counsel-file-jump)))
-  "fr" 'counsel-recentf
-  "rr" 'ivy-resume
-  "ss" 'swiper-isearch
-  "nn" 'narrow-to-region
-  "nw" 'widen
-  "v"  vc-prefix-map)
-(setq evil-leader/no-prefix-mode-rx '("magit-.*-mode" "gnus-.*-mode"))
-
-(ranger-override-dired-mode t)
+(require 'general)
+(general-define-key
+  :states '(normal insert emacs) 
+  :prefix "SPC"
+  :non-normal-prefix "M-SPC"
+  :keymaps 'override
+  "bb"    'counsel-buffer-or-recentf
+  "bl"     (lambda () (interactive) (switch-to-buffer nil))
+  "bk"    'kill-buffer
+  "ee"    'flymake-goto-next-error
+  "ff"    'counsel-find-file
+  "fr"    'counsel-recentf
+  "rr"    'ivy-resume
+  "ss"    'swiper-isearch
+  "v"      vc-prefix-map
+  "<SPC>" 'counsel-M-x)
 
 (require 'evil)
 (evil-mode 1)
@@ -121,11 +60,14 @@
     ;; make evil-search-word look for symbol rather than word boundaries
     (setq-default evil-symbol-word-search t))
 
-(require 'evil-nerd-commenter)
-(evilnc-default-hotkeys)
+(evil-define-key '(normal motion) global-map "s" #'avy-goto-char-2)
+(evil-define-key 'normal global-map "gc" 'comment-line)
 
-(require 'evil-surround)
-(global-evil-surround-mode 1)
+(add-to-list 'evil-buffer-regexps '("*Packages*" . normal))
+(evil-define-key 'normal package-menu-mode-map (kbd "i") #'package-menu-mark-install)
+(evil-define-key 'normal package-menu-mode-map (kbd "d") #'package-menu-mark-delete)
+(evil-define-key 'normal package-menu-mode-map (kbd "u") #'package-menu-mark-unmark)
+(evil-define-key 'normal package-menu-mode-map (kbd "x") #'package-menu-execute)
 
 (require 'keyfreq)
 (setq keyfreq-excluded-commands
@@ -186,9 +128,8 @@
  '(custom-safe-themes
    '("4cf3221feff536e2b3385209e9b9dc4c2e0818a69a1cdb4b522756bcdf4e00a4" default))
  '(evil-escape-mode t)
- '(global-evil-matchit-mode t)
  '(package-selected-packages
-   '(evil-surround ranger counsel ivy which-key evil-matchit color-theme-sanityinc-solarized evil-nerd-commenter keyfreq evil-leader evil company eglot yasnippet diminish undo-tree bind-key))
+   '(smex avy counsel ivy which-key color-theme-sanityinc-solarized keyfreq evil-leader evil company eglot yasnippet diminish undo-tree general))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
@@ -200,4 +141,3 @@
  
 (provide 'init)
 ;;; init.el ends here
-(put 'narrow-to-region 'disabled nil)
