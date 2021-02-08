@@ -2,138 +2,170 @@
 ;;; Commentary:
 ;;; Code:
 
+(setq package-archives
+      '(("melpa" . "http://mirrors.cloud.tencent.com/elpa/melpa/")
+        ("gnu"   . "http://mirrors.cloud.tencent.com/elpa/gnu/")))
+
+;; when use offline emacs, use local elpa
+;; (setq package-archives '(("elpa-local" . "~/.emacs.d/elpa-local/")))
+
+(defvar my/package-list "Custom packagesa")
+(setq my/package-list '(company counsel spacemacs-theme eglot general evil diminish bind-key keyfreq go-mode rust-mode flycheck yasnippet sudo-edit avy smex expand-region))
+
 (require 'package)
+(mapc #'(lambda (package)
+	  (unless (package-installed-p package)
+	    (package-install package)))
+      my/package-list)
 
-(setq-default package-archives
-              '(("melpa" . "http://mirrors.cloud.tencent.com/elpa/melpa/")
-                ("gnu"   . "http://mirrors.cloud.tencent.com/elpa/gnu/")))
-
+(menu-bar-mode -1)
+;; make it match the terminal's transparent background
+(set-face-background 'default "unspecified-bg" )
 (load-theme 'spacemacs-light t)
-(column-number-mode t)
-(line-number-mode t)
-(global-hl-line-mode t)
 
 (setq inhibit-startup-screen t)
-(setq initial-scratch-message nil)
-(setq initial-major-mode 'text-mode)
+
+(column-number-mode t)
+(line-number-mode t)
+(delete-selection-mode 1)
+
+(global-hl-line-mode t)
 
 (setq make-backup-files nil)
 (setq auto-save-default nil)
+(setq create-lockfiles nil)
+
+(setq custom-safe-themes t)
+(setq custom-file (make-temp-file ""))
 
 (global-auto-revert-mode t)
 (fset 'yes-or-no-p'y-or-n-p)
+
+(electric-pair-mode 1)
+(setq electric-pair-inhibit-predicate
+      'electric-pair-conservative-inhibit)
 
 (show-paren-mode t)
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
 
-(setq scroll-conservatively 101
-      scroll-margin 5
-      scroll-preserve-screen-position 't)
-
-(setq c-default-style "linux"
-      c-basic-offset 4)
 (setq-default tab-width 4
               indent-tabs-mode nil)
 
-(defun my-c-mode-hook ()
-  (c-toggle-hungry-state 1)
-  (c-toggle-comment-style -1))
-(add-hook 'c-mode-hook 'my-c-mode-hook)
+(require 'bind-key)
+
+(require 'diminish)
+
+(require 'keyfreq)
+(keyfreq-mode 1)
+(keyfreq-autosave-mode 1)
+(setq keyfreq-excluded-commands
+      '(self-insert-command
+        forward-char
+        backward-char
+        previous-line
+        next-line))
+
+;; (require 'which-key)
+;; (diminish 'which-key-mode)
+;; (which-key-mode)
+;; (setq which-key-idle-delay 4)
 
 (require 'general)
 (general-define-key
-  :states '(normal insert emacs) 
-  :prefix "SPC"
-  :non-normal-prefix "M-SPC"
-  :keymaps 'override
-  "ff"    'counsel-find-file
-  "fr"    'counsel-recentf
-  "fs"    'save-buffer
-  "bl"     (lambda () (interactive) (switch-to-buffer nil))
-  "bk"    'kill-buffer
-  "ee"    'flymake-goto-next-error
-  "rr"    'ivy-resume
-  "ss"    'swiper-isearch
-  "v"     'er/expand-region
-  "<SPC>" 'counsel-M-x)
+ :states '(normal insert emacs)
+ :prefix "SPC"
+ :non-normal-prefix "M-SPC"
+ :keymaps 'override
+ "ff"    'counsel-find-file
+ "fr"    'counsel-recentf
+ "fs"    'save-buffer
+ "bl"     (lambda () (interactive) (switch-to-buffer nil))
+ "bk"    'kill-buffer
+ "ee"    'flycheck-next-error
+ "r"     'ivy-resume
+ "/"     'swiper-isearch
+ "v"     'er/expand-region
+ "<SPC>" 'counsel-M-x
+ "="     '(:keymap vc-prefix-map :which-key "vc")
+ "p"     '(:keymap project-prefix-map :which-key "project"))
 
+(setq evil-want-C-u-scroll t)
 (require 'evil)
-(evil-mode 1)
+(evil-set-undo-system 'undo-redo)
 (with-eval-after-load 'evil
-    (defalias #'forward-evil-word #'forward-evil-symbol)
-    ;; make evil-search-word look for symbol rather than word boundaries
-    (setq-default evil-symbol-word-search t))
-
-(evil-define-key '(normal motion) global-map "s" #'avy-goto-char-timer)
-(evil-define-key 'normal global-map "gc" 'comment-line)
+  (defalias #'forward-evil-word #'forward-evil-symbol)
+  (setq-default evil-symbol-word-search t))
+(evil-mode 1)
 
 (require 'recentf)
 (recentf-mode 1)
-(setq recentf-max-menu-items 40)
-(setq recentf-max-saved-items 40)
-(add-to-list 'recentf-exclude "\\.el\\'")
-
-(require 'undo-tree)
-(add-hook 'after-init-hook 'global-undo-tree-mode)
-(setq undo-tree-visualizer-timestamps t)
-(setq undo-tree-visualizer-diff nil)
+(add-to-list 'recentf-exclude "\\elpa")
+(setq recentf-max-menu-items 64)
+(setq recentf-max-saved-items 64)
 
 (require 'company)
+(diminish 'company-mode)
+(global-company-mode)
 (setq company-show-numbers t)
 (setq company-dabbrev-downcase nil)
 (setq company-idle-delay 0.2)
 (setq company-minimum-prefix-length 2)
 (setq company-tooltip-limit 20)
-(setq company-backends (delete 'company-clang company-backends))
 
-(require 'diminish)
-(eval-after-load 'undo-tree
-  '(diminish 'undo-tree-mode))
-(eval-after-load 'company
-  '(diminish 'company-mode))
-(eval-after-load 'yasnippet
-  '(diminish 'yas-minor-mode))
-(diminish 'eldoc-mode)
-(diminish 'abbrev-mode)
+(require 'counsel)
+(bind-key "M-x" 'counsel-M-x)
+(bind-key "C-s" 'swiper-isearch)
+
+(require 'avy)
+
+(require 'smex)
+
+(require 'expand-region)
+
+(require 'yasnippet)
+
+(require 'sudo-edit)
+
+(require 'org)
+(setq org-export-with-toc nil)
+(setq org-html-head-include-default-style nil)
+(setq org-agenda-files (list "~/org/work.org"
+                             "~/org/home.org"))
+
+;; (require 'tree-sitter)
+
+;; (require 'tree-sitter-langs)
 
 (require 'eglot)
-(add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'js-mode-hook 'eglot-ensure)
 (add-hook 'python-mode-hook 'eglot-ensure)
-(setq-default flymake-diagnostic-functions nil)
+(add-hook 'eglot-managed-mode-hook (lambda () (flymake-mode -1)))
 
-;; common settings for prog mode
-(add-hook 'prog-mode-hook 'company-mode)
-(add-hook 'prog-mode-hook 'yas-minor-mode)
+(require 'flycheck)
+(add-hook 'prog-mode-hook 'flycheck-mode)
+
+(require 'cc-mode)
+(setq c-default-style "linux")
+(setq-default c-basic-offset 4)
+(setq-default c-basic-indent 2)
+(defun my/c-mode-hook()
+  (c-toggle-hungry-state 1)
+  (c-toggle-comment-style -1))
+(add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'c-mode-hook 'my/c-mode-hook)
+
+(require 'rust-mode)
+(add-hook 'rust-mode-hook 'eglot-ensure)
+
+(require 'go-mode)
+(add-hook 'go-mode-hook 'eglot-ensure)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#d2ceda" "#f2241f" "#67b11d" "#b1951d" "#3a81c3" "#a31db1" "#21b8c7" "#655370"])
- '(custom-safe-themes
-   '("fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "4cf3221feff536e2b3385209e9b9dc4c2e0818a69a1cdb4b522756bcdf4e00a4" default))
- '(evil-escape-mode t)
- '(hl-todo-keyword-faces
-   '(("TODO" . "#dc752f")
-     ("NEXT" . "#dc752f")
-     ("THEM" . "#2d9574")
-     ("PROG" . "#3a81c3")
-     ("OKAY" . "#3a81c3")
-     ("DONT" . "#f2241f")
-     ("FAIL" . "#f2241f")
-     ("DONE" . "#42ae2c")
-     ("NOTE" . "#b1951d")
-     ("KLUDGE" . "#b1951d")
-     ("HACK" . "#b1951d")
-     ("TEMP" . "#b1951d")
-     ("FIXME" . "#dc752f")
-     ("XXX+" . "#dc752f")
-     ("\\?\\?\\?+" . "#dc752f")))
- '(package-selected-packages
-   '(general evil ranger racket-mode sudo-edit which-key spacemacs-theme expand-region smex counsel swiper ivy avy elpa-mirror company eglot yasnippet diminish undo-tree))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
@@ -142,6 +174,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
+ 
 (provide 'init)
 ;;; init.el ends here
