@@ -97,6 +97,7 @@
   (defalias #'forward-evil-word #'forward-evil-symbol)
   (setq-default evil-symbol-word-search t))
 (evil-mode 1)
+(evil-define-key '(normal motion) global-map "s" 'avy-goto-char-timer)
 
 (require 'recentf)
 (recentf-mode 1)
