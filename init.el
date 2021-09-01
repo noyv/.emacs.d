@@ -9,67 +9,19 @@
 ;; when use offline emacs, use local elpa
 ;; (setq package-archives '(("elpa-local" . "~/.emacs.d/elpa-local/")))
 
-(defvar my/package-list "Custom packagesa")
-(setq my/package-list '(company counsel spacemacs-theme eglot general evil diminish bind-key keyfreq go-mode rust-mode flycheck yasnippet sudo-edit avy smex expand-region))
+(defvar my/package-list "Custom packages")
+(setq my/package-list '(company eglot general evil bind-key keyfreq go-mode rust-mode))
 
-(require 'package)
-(mapc #'(lambda (package)
-	  (unless (package-installed-p package)
-	    (package-install package)))
-      my/package-list)
+;; (mapc #'(lambda (package)
+;;         (unless (package-installed-p package)
+;;            (package-install package)))
+;;      my/package-list)
 
-(menu-bar-mode -1)
-;; make it match the terminal's transparent background
-(set-face-background 'default "unspecified-bg" )
-(load-theme 'spacemacs-light t)
+(exec-path-from-shell-initialize)
 
-(setq inhibit-startup-screen t)
-
-(column-number-mode t)
-(line-number-mode t)
-(delete-selection-mode 1)
-
-(global-hl-line-mode t)
-
-(setq make-backup-files nil)
-(setq auto-save-default nil)
-(setq create-lockfiles nil)
-
-(setq custom-safe-themes t)
-(setq custom-file (make-temp-file ""))
-
-(global-auto-revert-mode t)
-(fset 'yes-or-no-p'y-or-n-p)
-
-(electric-pair-mode 1)
-(setq electric-pair-inhibit-predicate
-      'electric-pair-conservative-inhibit)
-
-(show-paren-mode t)
-(setq split-height-threshold nil)
-(setq split-width-threshold 0)
-
-(setq-default tab-width 4
-              indent-tabs-mode nil)
-
-(require 'bind-key)
-
-(require 'diminish)
-
-(require 'keyfreq)
-(keyfreq-mode 1)
-(keyfreq-autosave-mode 1)
-(setq keyfreq-excluded-commands
-      '(self-insert-command
-        forward-char
-        backward-char
-        previous-line
-        next-line))
-
-;; (require 'which-key)
-;; (diminish 'which-key-mode)
-;; (which-key-mode)
-;; (setq which-key-idle-delay 4)
+(require 'which-key)
+(which-key-mode)
+(setq which-key-idle-delay 4)
 
 (require 'general)
 (general-define-key
@@ -77,79 +29,179 @@
  :prefix "SPC"
  :non-normal-prefix "M-SPC"
  :keymaps 'override
- "ff"    'counsel-find-file
- "fr"    'counsel-recentf
- "fs"    'save-buffer
- "bl"     (lambda () (interactive) (switch-to-buffer nil))
- "bk"    'kill-buffer
- "ee"    'flycheck-next-error
- "r"     'ivy-resume
- "/"     'swiper-isearch
+ "ff"    'find-file
+ "fr"    'consult-buffer
+ "fl"    'consult-line
+ "fe"    'consult-flymake
  "v"     'er/expand-region
- "<SPC>" 'counsel-M-x
+ "<SPC>" 'execute-extended-command
  "="     '(:keymap vc-prefix-map :which-key "vc")
  "p"     '(:keymap project-prefix-map :which-key "project"))
 
-(setq evil-want-C-u-scroll t)
+(setq-default evil-want-C-u-scroll t)
 (require 'evil)
 (evil-set-undo-system 'undo-redo)
 (with-eval-after-load 'evil
   (defalias #'forward-evil-word #'forward-evil-symbol)
   (setq-default evil-symbol-word-search t))
 (evil-mode 1)
-(evil-define-key '(normal motion) global-map "s" 'avy-goto-char-timer)
+
+;; (sis-ism-lazyman-config "1" "2" 'fcitx5)
+(sis-ism-lazyman-config
+ "com.apple.keylayout.ABC"
+ "com.apple.keylayout.SCIM.ITABC")
+(sis-global-cursor-color-mode t)
+(sis-global-respect-mode t)
+(sis-global-context-mode t)
+(sis-global-inline-mode t)
+
+;; (defun my/after-make-frame-functions-hook (frame)
+;;  (with-selected-frame frame
+;;    (load-theme 'spacemacs-light t)))
+
+;; (if (daemonp)
+;;     (add-hook 'after-make-frame-functions 'my/after-make-frame-functions-hook)
+;;   (load-theme 'spacemacs-light t))
+
+;; (set-face-background 'default "unspecified-bg")
+
+(setq inhibit-startup-screen t)
+(setq custom-safe-themes t)
+(setq split-height-threshold nil)
+(setq split-width-threshold 0)
+
+(menu-bar-mode -1)
+(column-number-mode t)
+(line-number-mode t)
+(show-paren-mode t)
+(global-hl-line-mode t)
+
+(set-face-attribute 'default nil
+                    :font (font-spec :name   "Monaco"
+                                     :weight 'normal
+                                     :size   14))
+
+;; (dolist (charset '(kana han cjk-misc bopomofo))
+;;  (set-fontset-font (frame-parameter nil 'font)
+;;                    charset
+;;                    (font-spec :name   "Noto Sans CJK SC"
+;;                               :weight 'normal
+;;                               :size   24)))
+
+(require-theme 'modus-themes)
+(setq-default modus-themes-headings '((1 . line)
+                                      (2 . rainbow-line-no-bold)
+                                      (t . no-bold))
+              modus-themes-links 'neutral-underline
+              modus-themes-org-blocks 'gray-background
+              ;; modus-themes-scale-headings t
+              ;; modus-themes-scale-1 1.1
+              ;; modus-themes-scale-2 1.15
+              ;; modus-themes-scale-3 1.21
+              ;; modus-themes-scale-4 1.27
+              ;; modus-themes-scale-5 1.33)
+              modus-themes-success-deuteranopia t)
+(modus-themes-load-themes)
+(modus-themes-load-operandi)
+
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq create-lockfiles nil)
+
+(global-auto-revert-mode t)
+(delete-selection-mode 1)
+
+(electric-pair-mode 1)
+(setq-default electric-pair-inhibit-predicate
+              'electric-pair-conservative-inhibit)
+
+(setq-default tab-width 4
+              indent-tabs-mode nil)
+
+(require 'expand-region)
+
+(require 'sudo-edit)
+
+(setq custom-file (make-temp-file ""))
+(fset 'yes-or-no-p'y-or-n-p)
 
 (require 'recentf)
 (recentf-mode 1)
 (add-to-list 'recentf-exclude "\\elpa")
-(setq recentf-max-menu-items 64)
-(setq recentf-max-saved-items 64)
+(setq recentf-max-menu-items 256)
+(setq recentf-max-saved-items 256)
+
+(require 'savehist)
+(savehist-mode)
 
 (require 'company)
-(diminish 'company-mode)
 (global-company-mode)
 (setq company-show-numbers t)
-(setq company-dabbrev-downcase nil)
-(setq company-idle-delay 0.2)
+(setq company-idle-delay 0.1)
 (setq company-minimum-prefix-length 2)
 (setq company-tooltip-limit 20)
 
-(require 'counsel)
-(bind-key "M-x" 'counsel-M-x)
-(bind-key "C-s" 'swiper-isearch)
-
 (require 'avy)
 
-(require 'smex)
+(require 'vertico)
+(vertico-mode)
+(setq completion-styles '(substring))
 
-(require 'expand-region)
+(require 'embark)
+(bind-key "M-o" 'embark-act)
+(bind-key "C-h B" 'embark-bindings)
+(setq prefix-help-command #'embark-prefix-help-command)
 
-(require 'yasnippet)
-
-(require 'sudo-edit)
+(require 'embark-consult)
+(add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode)
 
 (require 'org)
-(setq org-export-with-toc nil)
-(setq org-html-head-include-default-style nil)
-(setq org-agenda-files (list "~/org/work.org"
-                             "~/org/home.org"))
+(setq-default org-export-with-toc nil)
+(setq-default org-export-with-section-numbers nil)
+(setq-default org-html-head-include-default-style nil)
+(setq-default org-startup-folded 'content)
 
-;; (require 'tree-sitter)
+(require 'valign)
+(add-hook 'org-mode-hook #'valign-mode)
 
-;; (require 'tree-sitter-langs)
+(require 'org-journal)
+(setq-default org-journal-dir "~/org/journal/")
+(setq-default org-journal-file-type 'weekly)
+(setq-default org-journal-file-format "%Y-%m-%d.org")
+(setq-default org-journal-date-format "%Y-%m-%d %A")
+(setq org-journal-file-header "#+TITLE: Weekly Journal\n#+STARTUP: folded")
+
+(defun org-journal-find-location ()
+  ;; Open today's journal, but specify a non-nil prefix argument in order to
+  ;; inhibit inserting the heading; org-capture will insert the heading.
+  (org-journal-new-entry t)
+  (unless (eq org-journal-file-type 'daily)
+    (org-narrow-to-subtree))
+  (goto-char (point-max)))
+
+(setq org-capture-templates '(("j" "Journal entry" plain (function org-journal-find-location)
+                               "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
+                               :jump-to-captured t :immediate-finish t)))
+
+(require 'yasnippet)
+(add-hook 'prog-mode-hook 'yas-minor-mode)
 
 (require 'eglot)
+(setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
+(add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
 (add-hook 'js-mode-hook 'eglot-ensure)
 (add-hook 'python-mode-hook 'eglot-ensure)
-(add-hook 'eglot-managed-mode-hook (lambda () (flymake-mode -1)))
+;; (add-hook 'eglot-managed-mode-hook (lambda () (flymake-mode -1)))
+(setq-default eglot-workspace-configuration
+              '((gopls
+                 (usePlaceholders . t))))
 
-(require 'flycheck)
-(add-hook 'prog-mode-hook 'flycheck-mode)
+;; (require 'flycheck)
+;; (add-hook 'prog-mode-hook 'flycheck-mode)
 
 (require 'cc-mode)
 (setq c-default-style "linux")
-(setq-default c-basic-offset 4)
-(setq-default c-basic-indent 2)
+(setq c-basic-offset 4)
 (defun my/c-mode-hook()
   (c-toggle-hungry-state 1)
   (c-toggle-comment-style -1))
@@ -175,6 +227,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
- 
+
 (provide 'init)
 ;;; init.el ends here
