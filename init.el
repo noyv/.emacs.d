@@ -54,6 +54,8 @@
 (sis-global-respect-mode t)
 (sis-global-context-mode t)
 (sis-global-inline-mode t)
+(setq sis-do-set
+      (lambda(source) (start-process "set-input-source" nil "macism" source "50000")))
 
 ;; (defun my/after-make-frame-functions-hook (frame)
 ;;  (with-selected-frame frame
@@ -145,7 +147,9 @@
 
 (require 'vertico)
 (vertico-mode)
-(setq completion-styles '(substring))
+(setq completion-styles '(orderless)
+      completion-category-defaults nil
+      completion-category-overrides '((file (styles partial-completion))))
 
 (require 'embark)
 (bind-key "M-o" 'embark-act)
@@ -188,13 +192,8 @@
 
 (require 'eglot)
 (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
-(add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
 (add-hook 'js-mode-hook 'eglot-ensure)
 (add-hook 'python-mode-hook 'eglot-ensure)
-;; (add-hook 'eglot-managed-mode-hook (lambda () (flymake-mode -1)))
-(setq-default eglot-workspace-configuration
-              '((gopls
-                 (usePlaceholders . t))))
 
 ;; (require 'flycheck)
 ;; (add-hook 'prog-mode-hook 'flycheck-mode)
@@ -210,9 +209,24 @@
 
 (require 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
+(add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
 
 (require 'go-mode)
 (add-hook 'go-mode-hook 'eglot-ensure)
+(setq-default eglot-workspace-configuration
+              '((gopls
+                 (usePlaceholders . t))))
+(with-eval-after-load "go-mode"
+  (with-eval-after-load "project"
+    (defun project-find-go-module (dir)
+      (when-let ((root (locate-dominating-file dir "go.mod")))
+        (cons 'go-module root)))
+    (cl-defmethod project-root ((project (head go-module)))
+      (cdr project))
+    (add-hook 'project-find-functions #'project-find-go-module)))
+
+
+(setq go-translate-token-current (cons 430675 2721866130))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
