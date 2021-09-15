@@ -2,28 +2,40 @@
 ;;; Commentary:
 ;;; Code:
 
-(setq package-archives
-      '(("melpa" . "http://mirrors.cloud.tencent.com/elpa/melpa/")
-        ("gnu"   . "http://mirrors.cloud.tencent.com/elpa/gnu/")))
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+(setq straight-vc-git-default-clone-depth 1)
 
-;; when use offline emacs, use local elpa
-;; (setq package-archives '(("elpa-local" . "~/.emacs.d/elpa-local/")))
+(straight-use-package 'bind-key)
+(straight-use-package 'avy)
+(straight-use-package 'consult)
+(straight-use-package 'eglot)
+(straight-use-package 'markdown-mode)
+(straight-use-package 'protobuf-mode)
+(straight-use-package 'yaml-mode)
 
-(defvar my/package-list "Custom packages")
-(setq my/package-list '(company eglot general evil bind-key keyfreq go-mode rust-mode))
-
-;; (mapc #'(lambda (package)
-;;         (unless (package-installed-p package)
-;;            (package-install package)))
-;;      my/package-list)
-
+(straight-use-package 'exec-path-from-shell)
 (exec-path-from-shell-initialize)
 
-(require 'which-key)
+(setq-default mode-line-buffer-identification
+              '((:eval (list (abbreviate-file-name
+                              (expand-file-name buffer-file-name))))))
+
+(straight-use-package 'which-key)
 (which-key-mode)
 (setq which-key-idle-delay 4)
 
-(require 'general)
+(straight-use-package 'general)
 (general-define-key
  :states '(normal insert emacs)
  :prefix "SPC"
@@ -33,19 +45,22 @@
  "fr"    'consult-buffer
  "fl"    'consult-line
  "fe"    'consult-flymake
+ "gg"    'consult-ripgrep
  "v"     'er/expand-region
  "<SPC>" 'execute-extended-command
  "="     '(:keymap vc-prefix-map :which-key "vc")
  "p"     '(:keymap project-prefix-map :which-key "project"))
 
 (setq-default evil-want-C-u-scroll t)
-(require 'evil)
-(evil-set-undo-system 'undo-redo)
+(setq evil-disable-insert-state-bindings t)
+(straight-use-package 'evil)
+(setq evil-undo-system 'undo-redo)
 (with-eval-after-load 'evil
   (defalias #'forward-evil-word #'forward-evil-symbol)
   (setq-default evil-symbol-word-search t))
 (evil-mode 1)
 
+(straight-use-package 'sis)
 ;; (sis-ism-lazyman-config "1" "2" 'fcitx5)
 (sis-ism-lazyman-config
  "com.apple.keylayout.ABC"
@@ -76,12 +91,8 @@
 (column-number-mode t)
 (line-number-mode t)
 (show-paren-mode t)
-(global-hl-line-mode t)
-
-(set-face-attribute 'default nil
-                    :font (font-spec :name   "Monaco"
-                                     :weight 'normal
-                                     :size   14))
+;; (global-hl-line-mode t)
+(add-to-list 'default-frame-alist '(font . "Monaco-14"))
 
 ;; (dolist (charset '(kana han cjk-misc bopomofo))
 ;;  (set-fontset-font (frame-parameter nil 'font)
@@ -91,18 +102,6 @@
 ;;                               :size   24)))
 
 (require-theme 'modus-themes)
-(setq-default modus-themes-headings '((1 . line)
-                                      (2 . rainbow-line-no-bold)
-                                      (t . no-bold))
-              modus-themes-links 'neutral-underline
-              modus-themes-org-blocks 'gray-background
-              ;; modus-themes-scale-headings t
-              ;; modus-themes-scale-1 1.1
-              ;; modus-themes-scale-2 1.15
-              ;; modus-themes-scale-3 1.21
-              ;; modus-themes-scale-4 1.27
-              ;; modus-themes-scale-5 1.33)
-              modus-themes-success-deuteranopia t)
 (modus-themes-load-themes)
 (modus-themes-load-operandi)
 
@@ -120,9 +119,9 @@
 (setq-default tab-width 4
               indent-tabs-mode nil)
 
-(require 'expand-region)
+(straight-use-package 'expand-region)
 
-(require 'sudo-edit)
+(straight-use-package 'sudo-edit)
 
 (setq custom-file (make-temp-file ""))
 (fset 'yes-or-no-p'y-or-n-p)
@@ -130,33 +129,43 @@
 (require 'recentf)
 (recentf-mode 1)
 (add-to-list 'recentf-exclude "\\elpa")
-(setq recentf-max-menu-items 256)
-(setq recentf-max-saved-items 256)
+(setq recentf-max-menu-items 64)
+(setq recentf-max-saved-items 64)
 
 (require 'savehist)
 (savehist-mode)
 
-(require 'company)
+(straight-use-package 'company)
 (global-company-mode)
 (setq company-show-numbers t)
 (setq company-idle-delay 0.1)
 (setq company-minimum-prefix-length 2)
 (setq company-tooltip-limit 20)
 
-(require 'avy)
-
-(require 'vertico)
+;; (straight-use-package '( vertico :files (:defaults "extensions/*")
+;;                          :includes (vertico-buffer
+;;                                     vertico-directory
+;;                                     vertico-flat
+;;                                     vertico-indexed
+;;                                     vertico-mouse
+;;                                     vertico-quick
+;;                                     vertico-repeat
+;;                                     vertico-reverse)))
+(straight-use-package 'vertico)
 (vertico-mode)
+
+(straight-use-package 'orderless)
+;; (icomplete-vertical-mode)
 (setq completion-styles '(orderless)
       completion-category-defaults nil
       completion-category-overrides '((file (styles partial-completion))))
 
-(require 'embark)
+(straight-use-package 'embark)
 (bind-key "M-o" 'embark-act)
 (bind-key "C-h B" 'embark-bindings)
 (setq prefix-help-command #'embark-prefix-help-command)
 
-(require 'embark-consult)
+(straight-use-package 'embark-consult)
 (add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode)
 
 (require 'org)
@@ -165,10 +174,10 @@
 (setq-default org-html-head-include-default-style nil)
 (setq-default org-startup-folded 'content)
 
-(require 'valign)
+(straight-use-package 'valign)
 (add-hook 'org-mode-hook #'valign-mode)
 
-(require 'org-journal)
+(straight-use-package 'org-journal)
 (setq-default org-journal-dir "~/org/journal/")
 (setq-default org-journal-file-type 'weekly)
 (setq-default org-journal-file-format "%Y-%m-%d.org")
@@ -187,16 +196,14 @@
                                "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
                                :jump-to-captured t :immediate-finish t)))
 
-(require 'yasnippet)
+(straight-use-package 'yasnippet)
+(straight-use-package 'yasnippet-snippets)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
-(require 'eglot)
+(straight-use-package 'eglot)
 (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
 (add-hook 'js-mode-hook 'eglot-ensure)
 (add-hook 'python-mode-hook 'eglot-ensure)
-
-;; (require 'flycheck)
-;; (add-hook 'prog-mode-hook 'flycheck-mode)
 
 (require 'cc-mode)
 (setq c-default-style "linux")
@@ -207,26 +214,24 @@
 (add-hook 'c-mode-hook 'eglot-ensure)
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
+(straight-use-package 'rust-mode)
 (require 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
-(add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
+;; (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
 
-(require 'go-mode)
+(straight-use-package 'go-mode)
 (add-hook 'go-mode-hook 'eglot-ensure)
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
-(with-eval-after-load "go-mode"
-  (with-eval-after-load "project"
-    (defun project-find-go-module (dir)
-      (when-let ((root (locate-dominating-file dir "go.mod")))
-        (cons 'go-module root)))
-    (cl-defmethod project-root ((project (head go-module)))
-      (cdr project))
-    (add-hook 'project-find-functions #'project-find-go-module)))
+(defun project-find-go-module (dir)
+  (when-let ((root (locate-dominating-file dir "go.mod")))
+    (cons 'go-module root)))
 
+(cl-defmethod project-root ((project (head go-module)))
+  (cdr project))
 
-(setq go-translate-token-current (cons 430675 2721866130))
+(add-hook 'project-find-functions #'project-find-go-module)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
