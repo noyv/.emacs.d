@@ -14,18 +14,19 @@
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
-(setq straight-vc-git-default-clone-depth 1)
+;; (setq straight-vc-git-default-clone-depth 1)
 
 (straight-use-package 'bind-key)
 (straight-use-package 'avy)
 (straight-use-package 'consult)
 (straight-use-package 'eglot)
 (straight-use-package 'markdown-mode)
-(straight-use-package 'protobuf-mode)
+;; (straight-use-package 'protobuf-mode)
 (straight-use-package 'yaml-mode)
 
 (straight-use-package 'exec-path-from-shell)
 (exec-path-from-shell-initialize)
+(setq max-specpdl-size 1024)
 
 (setq-default mode-line-buffer-identification
               '((:eval (list (abbreviate-file-name
@@ -101,7 +102,7 @@
 ;;                               :weight 'normal
 ;;                               :size   24)))
 
-(require-theme 'modus-themes)
+(straight-use-package 'modus-themes)
 (modus-themes-load-themes)
 (modus-themes-load-operandi)
 
@@ -177,24 +178,24 @@
 (straight-use-package 'valign)
 (add-hook 'org-mode-hook #'valign-mode)
 
-(straight-use-package 'org-journal)
-(setq-default org-journal-dir "~/org/journal/")
-(setq-default org-journal-file-type 'weekly)
-(setq-default org-journal-file-format "%Y-%m-%d.org")
-(setq-default org-journal-date-format "%Y-%m-%d %A")
-(setq org-journal-file-header "#+TITLE: Weekly Journal\n#+STARTUP: folded")
+;; (straight-use-package 'org-journal)
+;; (setq-default org-journal-dir "~/org/journal/")
+;; (setq-default org-journal-file-type 'weekly)
+;; (setq-default org-journal-file-format "%Y-%m-%d.org")
+;; (setq-default org-journal-date-format "%Y-%m-%d %A")
+;; (setq org-journal-file-header "#+TITLE: Weekly Journal\n#+STARTUP: folded")
 
-(defun org-journal-find-location ()
-  ;; Open today's journal, but specify a non-nil prefix argument in order to
-  ;; inhibit inserting the heading; org-capture will insert the heading.
-  (org-journal-new-entry t)
-  (unless (eq org-journal-file-type 'daily)
-    (org-narrow-to-subtree))
-  (goto-char (point-max)))
+;; (defun org-journal-find-location ()
+;;   ;; Open today's journal, but specify a non-nil prefix argument in order to
+;;   ;; inhibit inserting the heading; org-capture will insert the heading.
+;;   (org-journal-new-entry t)
+;;   (unless (eq org-journal-file-type 'daily)
+;;     (org-narrow-to-subtree))
+;;   (goto-char (point-max)))
 
-(setq org-capture-templates '(("j" "Journal entry" plain (function org-journal-find-location)
-                               "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
-                               :jump-to-captured t :immediate-finish t)))
+;; (setq org-capture-templates '(("j" "Journal entry" plain (function org-journal-find-location)
+;;                                "** %(format-time-string org-journal-time-format)%^{Title}\n%i%?"
+;;                                :jump-to-captured t :immediate-finish t)))
 
 (straight-use-package 'yasnippet)
 (straight-use-package 'yasnippet-snippets)
