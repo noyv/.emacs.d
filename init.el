@@ -23,10 +23,6 @@
 (global-auto-revert-mode t)
 (delete-selection-mode 1)
 
-(electric-pair-mode 1)
-(setq-default electric-pair-inhibit-predicate
-              'electric-pair-conservative-inhibit)
-
 (setq-default tab-width 4
               indent-tabs-mode nil)
 
@@ -43,7 +39,6 @@
 (column-number-mode t)
 (line-number-mode t)
 (show-paren-mode t)
-;; (global-hl-line-mode t)
 (add-to-list 'default-frame-alist '(font . "Monaco-14"))
 
 (setq custom-file (make-temp-file ""))
@@ -71,12 +66,14 @@
 (straight-use-package 'smex)
 (straight-use-package 'expand-region)
 (straight-use-package 'sudo-edit)
-(straight-use-package 'project)
+(straight-use-package 'smartparens)
+
 (straight-use-package 'markdown-mode)
 (straight-use-package 'yaml-mode)
 
-(straight-use-package 'exec-path-from-shell)
-(exec-path-from-shell-initialize)
+(when (memq window-system '(mac ns x))
+  (straight-use-package 'exec-path-from-shell)
+  (exec-path-from-shell-initialize))
 
 (straight-use-package 'which-key)
 (which-key-mode)
@@ -96,6 +93,7 @@
   ;; "<SPC>" 'execute-extended-command
   "<SPC>" 'counsel-M-x
   "="     '(:keymap vc-prefix-map :which-key "vc"))
+  "r"     'ivy-resume
   ;; "p"     '(:keymap project-prefix-map :which-key "project"))
 
 (setq-default evil-want-C-u-scroll t)
@@ -144,15 +142,17 @@
   (c-toggle-hungry-state 1)
   (c-toggle-comment-style -1))
 (add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'c-mode-hook 'smartparens-mode)
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
 (straight-use-package 'rust-mode)
-(require 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
+(add-hook 'rust-mode-hook 'smartparens-mode)
 ;; (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
 
 (straight-use-package 'go-mode)
 (add-hook 'go-mode-hook 'eglot-ensure)
+(add-hook 'go-mode-hook 'smartparens-mode)
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
