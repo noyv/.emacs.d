@@ -31,6 +31,9 @@
                               (expand-file-name buffer-file-name))))))
 
 (setq inhibit-startup-screen t)
+(setq initial-major-mode 'fundamental-mode)
+(setq initial-scratch-message nil)
+
 (setq custom-safe-themes t)
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
@@ -39,7 +42,8 @@
 (column-number-mode t)
 (line-number-mode t)
 (show-paren-mode t)
-(add-to-list 'default-frame-alist '(font . "Monaco-14"))
+(global-hl-line-mode)
+(add-to-list 'default-frame-alist '(font . "Monaco-16"))
 
 (setq custom-file (make-temp-file ""))
 (fset 'yes-or-no-p'y-or-n-p)
@@ -105,9 +109,9 @@
   (setq-default evil-symbol-word-search t))
 (evil-mode 1)
 
-(straight-use-package 'modus-themes)
-(modus-themes-load-themes)
-(modus-themes-load-operandi)
+;; (straight-use-package 'modus-themes)
+;; (modus-themes-load-themes)
+;; (modus-themes-load-operandi)
 
 (straight-use-package 'company)
 (global-company-mode)
@@ -131,7 +135,6 @@
 
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
-(add-hook 'js-mode-hook 'eglot-ensure)
 (add-hook 'python-mode-hook 'eglot-ensure)
 (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
 
@@ -144,6 +147,10 @@
 (add-hook 'c-mode-hook 'eglot-ensure)
 (add-hook 'c-mode-hook 'smartparens-mode)
 (add-hook 'c-mode-hook 'my/c-mode-hook)
+
+;; when lang js
+(add-hook 'js-mode-hook 'eglot-ensure)
+(add-hook 'js-mode-hook 'smartparens-mode)
 
 (straight-use-package 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
@@ -159,7 +166,6 @@
 (defun project-find-go-module (dir)
   (when-let ((root (locate-dominating-file dir "go.mod")))
     (cons 'go-module root)))
-
 (cl-defmethod project-root ((project (head go-module)))
   (cdr project))
 
