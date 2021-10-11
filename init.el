@@ -109,9 +109,17 @@
   (setq-default evil-symbol-word-search t))
 (evil-mode 1)
 
-;; (straight-use-package 'modus-themes)
-;; (modus-themes-load-themes)
-;; (modus-themes-load-operandi)
+(defun local-graphic-config()
+  (add-to-list 'default-frame-alist '(font . "FiraCode-16"))
+  (load-theme 'modus-operandi t))
+
+(defun local-terminal-config()
+  (straight-use-package 'evil-terminal-cursor-changer)
+  (evil-terminal-cursor-changer-activate))
+
+(if (display-graphic-p)
+    (local-graphic-config)
+  (local-terminal-config))
 
 (straight-use-package 'company)
 (global-company-mode)
