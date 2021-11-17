@@ -19,15 +19,11 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 
-(global-auto-revert-mode t)
-(delete-selection-mode 1)
+;; (global-auto-revert-mode t)
+;; (delete-selection-mode t)
 
 (setq-default tab-width 4
               indent-tabs-mode nil)
-
-(setq-default mode-line-buffer-identification
-              '((:eval (list (abbreviate-file-name
-                              (expand-file-name buffer-file-name))))))
 
 (setq inhibit-startup-screen t)
 (setq initial-major-mode 'fundamental-mode)
@@ -42,22 +38,22 @@
 (line-number-mode t)
 (show-paren-mode t)
 (global-hl-line-mode)
-(add-to-list 'default-frame-alist '(font . "Monaco-16"))
 
-(setq custom-file (make-temp-file ""))
 (fset 'yes-or-no-p'y-or-n-p)
 
-(recentf-mode 1)
+(savehist-mode)
+
+(recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
-(setq recentf-max-menu-items 64)
-(setq recentf-max-saved-items 64)
+(setq recentf-max-menu-items 32)
+(setq recentf-max-saved-items 32)
 
 (when (memq window-system '(mac ns x))
   (straight-use-package 'exec-path-from-shell)
   (exec-path-from-shell-initialize))
 
 (defun local-graphic-config()
-  (add-to-list 'default-frame-alist '(font . "FiraCode-16"))
+  (add-to-list 'default-frame-alist '(font . "Iosevka-18"))
   (load-theme 'modus-operandi t))
 
 (defun local-terminal-config()
@@ -69,8 +65,6 @@
   (local-terminal-config))
 
 (straight-use-package 'bind-key)
-(straight-use-package 'avy)
-(straight-use-package 'expand-region)
 (straight-use-package 'sudo-edit)
 
 (straight-use-package 'smartparens)
@@ -90,7 +84,6 @@
 
 (straight-use-package 'vertico)
 (vertico-mode)
-(savehist-mode)
 (defun crm-indicator (args)
   (cons (concat "[CRM] " (car args)) (cdr args)))
 (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
@@ -100,12 +93,13 @@
 (setq completion-styles '(substring orderless))
 
 (straight-use-package 'consult)
-(require 'consult)
-(consult-customize
- consult-ripgrep consult-git-grep consult-grep
- consult-bookmark consult-recent-file consult-xref
- consult--source-file consult--source-project-file consult--source-bookmark
- :preview-key (kbd "M-."))
+(with-eval-after-load 'consult
+  (setq consult-buffer-filter '("^ " "\\*Messages\\*" "\\*straight*"))
+  (consult-customize
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-file consult--source-project-file consult--source-bookmark
+   :preview-key (kbd "M-.")))
 
 (straight-use-package 'embark)
 (bind-key "M-o" 'embark-act)
@@ -127,24 +121,24 @@
  :non-normal-prefix "M-SPC"
  :keymaps 'override
  "<SPC>" 'execute-extended-command
- ;; "<SPC>" 'counsel-M-x
- ;; "ff"    'counsel-find-file
  "ff"    'find-file
  "fr"    'consult-buffer
  "fe"    'consult-flymake
  "fl"    'consult-line
- "v"     'er/expand-region
+ "ca"    'eglot-code
+ "cr"    'eglot-rename
+ "cf"    'eglot-format
  "="     '(:keymap vc-prefix-map :which-key "vc")
  "p"     '(:keymap project-prefix-map :which-key "project"))
 
 (straight-use-package 'evil)
-(setq-default evil-want-C-u-scroll t)
-(setq evil-disable-insert-state-bindings t)
+(defalias #'forward-evil-word #'forward-evil-symbol)
+(setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
-(with-eval-after-load 'evil
-  (defalias #'forward-evil-word #'forward-evil-symbol)
-  (setq-default evil-symbol-word-search t))
 (evil-mode 1)
+
+(straight-use-package 'avy)
+(evil-define-key '(normal motion) global-map "s" #'avy-goto-char-timer)
 
 (straight-use-package 'company)
 (global-company-mode)
@@ -153,19 +147,12 @@
 (setq company-minimum-prefix-length 2)
 (setq company-tooltip-limit 20)
 
-(straight-use-package 'valign)
-(add-hook 'org-mode-hook 'valign-mode)
-
 (straight-use-package 'yasnippet)
 (straight-use-package 'yasnippet-snippets)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
-;; (straight-use-package 'flycheck)
-;; (add-hook 'prog-mode-hook 'flycheck-mode)
-
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
-;; (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
 (setq eldoc-idle-dealy 2)
 
 ;; when lang c/c++
@@ -189,18 +176,12 @@
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
-(defun project-find-go-module (dir)
-  (when-let ((root (locate-dominating-file dir "go.mod")))
-    (cons 'go-module root)))
-(cl-defmethod project-root ((project (head go-module)))
-  (cdr project))
-(add-hook 'project-find-functions #'project-find-go-module)
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
-(require 'eglot)
-(add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer")))
+(with-eval-after-load 'eglot
+ (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
 
 ;; when lang org
 (straight-use-package '(org :type built-in))
@@ -209,11 +190,16 @@
 (setq-default org-html-head-include-default-style nil)
 (setq-default org-startup-folded 'content)
 
+(straight-use-package 'valign)
+(add-hook 'org-mode-hook 'valign-mode)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-disable-insert-state-bindings t)
+ '(evil-want-C-u-scroll t)
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
