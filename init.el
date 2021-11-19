@@ -54,7 +54,9 @@
 
 (defun local-graphic-config()
   (add-to-list 'default-frame-alist '(font . "Iosevka-18"))
-  (load-theme 'modus-operandi t))
+  (load-theme 'modus-operandi t)
+  (straight-use-package 'valign)
+  (add-hook 'org-mode-hook 'valign-mode))
 
 (defun local-terminal-config()
   (straight-use-package 'evil-terminal-cursor-changer)
@@ -76,6 +78,24 @@
 (straight-use-package 'which-key)
 (which-key-mode)
 (setq-default which-key-idle-delay 4)
+
+(straight-use-package 'general)
+(general-create-definer general-leader-def
+  :states '(normal insert emacs)
+  :prefix "SPC"
+  :non-normal-prefix "M-SPC"
+  :prefix-command 'leader-prefix-command
+  :prefix-map 'leader-prefix-map)
+(general-leader-def "<SPC>" 'execute-extended-command)
+(general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
+(general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
+
+(straight-use-package 'evil)
+(defalias #'forward-evil-word #'forward-evil-symbol)
+(setq evil-symbol-word-search t)
+(setq evil-undo-system 'undo-redo)
+(evil-mode 1)
+(general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
 
 (straight-use-package 'orderless)
 (setq completion-styles '(orderless)
@@ -100,6 +120,13 @@
    consult-bookmark consult-recent-file consult-xref
    consult--source-file consult--source-project-file consult--source-bookmark
    :preview-key (kbd "M-.")))
+(defun consult-line-symbol-at-point ()
+  (interactive)
+  (consult-line (thing-at-point 'symbol)))
+(general-leader-def "ff" 'find-file)
+(general-leader-def "fr" 'consult-buffer)
+(general-leader-def "fe" 'consult-flymake)
+(general-leader-def "fl" 'consult-line)
 
 (straight-use-package 'embark)
 (bind-key "M-o" 'embark-act)
@@ -114,31 +141,8 @@
 (straight-use-package 'embark-consult)
 (add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode)
 
-(straight-use-package 'general)
-(general-define-key
- :states '(normal insert emacs)
- :prefix "SPC"
- :non-normal-prefix "M-SPC"
- :keymaps 'override
- "<SPC>" 'execute-extended-command
- "ff"    'find-file
- "fr"    'consult-buffer
- "fe"    'consult-flymake
- "fl"    'consult-line
- "ca"    'eglot-code
- "cr"    'eglot-rename
- "cf"    'eglot-format
- "="     '(:keymap vc-prefix-map :which-key "vc")
- "p"     '(:keymap project-prefix-map :which-key "project"))
-
-(straight-use-package 'evil)
-(defalias #'forward-evil-word #'forward-evil-symbol)
-(setq evil-symbol-word-search t)
-(setq evil-undo-system 'undo-redo)
-(evil-mode 1)
-
 (straight-use-package 'avy)
-(evil-define-key '(normal motion) global-map "s" #'avy-goto-char-timer)
+(general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
 (straight-use-package 'company)
 (global-company-mode)
@@ -151,9 +155,13 @@
 (straight-use-package 'yasnippet-snippets)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
+;; configure eglot
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
 (setq eldoc-idle-dealy 2)
+(general-leader-def "ca" 'eglot-code-actions)
+(general-leader-def "cr" 'eglot-rename)
+(general-leader-def "cf" 'eglot-format)
 
 ;; when lang c/c++
 (setq c-default-style "linux")
@@ -181,7 +189,7 @@
 (straight-use-package 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
 (with-eval-after-load 'eglot
- (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
+  (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
 
 ;; when lang org
 (straight-use-package '(org :type built-in))
@@ -189,9 +197,8 @@
 (setq-default org-export-with-section-numbers nil)
 (setq-default org-html-head-include-default-style nil)
 (setq-default org-startup-folded 'content)
+(general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 
-(straight-use-package 'valign)
-(add-hook 'org-mode-hook 'valign-mode)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
