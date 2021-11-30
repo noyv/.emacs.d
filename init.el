@@ -113,6 +113,7 @@
 (setq completion-styles '(substring orderless))
 
 (straight-use-package 'consult)
+(straight-use-package 'consult-flycheck)
 (with-eval-after-load 'consult
   (setq consult-buffer-filter '("^ " "\\*Messages\\*" "\\*straight*"))
   (consult-customize
@@ -125,7 +126,7 @@
   (consult-line (thing-at-point 'symbol)))
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fr" 'consult-buffer)
-(general-leader-def "fe" 'consult-flymake)
+(general-leader-def "fe" 'consult-flycheck)
 (general-leader-def "fl" 'consult-line)
 
 (straight-use-package 'embark)
@@ -158,10 +159,15 @@
 ;; configure eglot
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
+(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
 (setq eldoc-idle-dealy 2)
 (general-leader-def "ca" 'eglot-code-actions)
+(general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
 (general-leader-def "cf" 'eglot-format)
+
+(straight-use-package 'flycheck)
+(add-hook 'prog-mode-hook 'flycheck-mode)
 
 ;; when lang c/c++
 (setq c-default-style "linux")
@@ -184,6 +190,10 @@
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
+
+(straight-use-package 'flycheck-golangci-lint)
+(eval-after-load 'flycheck
+  '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
