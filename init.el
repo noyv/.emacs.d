@@ -2,6 +2,8 @@
 ;;; Commentary:
 ;;; Code:
 
+;; -*- lexical-binding: t -*-
+
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -75,10 +77,6 @@
 (straight-use-package 'markdown-mode)
 (straight-use-package 'yaml-mode)
 
-(straight-use-package 'which-key)
-(which-key-mode)
-(setq-default which-key-idle-delay 4)
-
 (straight-use-package 'general)
 (general-create-definer general-leader-def
   :states '(normal insert emacs)
@@ -97,20 +95,16 @@
 (evil-mode 1)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
 
+(straight-use-package 'vertico)
+(vertico-mode)
+
 (straight-use-package 'orderless)
 (setq completion-styles '(orderless)
       completion-category-defaults nil
       completion-category-overrides '((file (styles partial-completion))))
 
-(straight-use-package 'vertico)
-(vertico-mode)
-(defun crm-indicator (args)
-  (cons (concat "[CRM] " (car args)) (cdr args)))
-(advice-add #'completing-read-multiple :filter-args #'crm-indicator)
-(setq minibuffer-prompt-properties
-      '(read-only t cursor-intangible t face minibuffer-prompt))
-(add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-(setq completion-styles '(substring orderless))
+(straight-use-package 'marginalia)
+(marginalia-mode t)
 
 (straight-use-package 'consult)
 (straight-use-package 'consult-flycheck)
@@ -131,13 +125,7 @@
 
 (straight-use-package 'embark)
 (bind-key "M-o" 'embark-act)
-(bind-key "C-h B" 'embark-bindings)
-(setq prefix-help-command #'embark-prefix-help-command)
-;; Hide the mode line of the Embark live/completions buffers
-(add-to-list 'display-buffer-alist
-             '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-               nil
-               (window-parameters (mode-line-format . none))))
+(setq prefix-help-command 'embark-prefix-help-command)
 
 (straight-use-package 'embark-consult)
 (add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode)
@@ -155,6 +143,9 @@
 (straight-use-package 'yasnippet)
 (straight-use-package 'yasnippet-snippets)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
+
+(straight-use-package 'tree-sitter)
+(straight-use-package 'tree-sitter-langs)
 
 ;; configure eglot
 (straight-use-package 'eglot)
@@ -176,17 +167,21 @@
   (c-toggle-hungry-state 1)
   (c-toggle-comment-style -1))
 (add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'c-mode-hook 'tree-sitter-hl-mode)
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
 ;; when lang python
 (add-hook 'python-mode-hook 'eglot-ensure)
+(add-hook 'python-mode-hook 'tree-sitter-hl-mode)
 
 ;; when lang js
 (add-hook 'js-mode-hook 'eglot-ensure)
+(add-hook 'js-mode-hook 'tree-sitter-hl-mode)
 
 ;; when lang golang
 (straight-use-package 'go-mode)
 (add-hook 'go-mode-hook 'eglot-ensure)
+(add-hook 'go-mode-hook 'tree-sitter-hl-mode)
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
@@ -198,8 +193,7 @@
 ;; when lang rust
 (straight-use-package 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
+(add-hook 'rust-mode-hook 'tree-sitter-hl-mode)
 
 ;; when lang org
 (straight-use-package '(org :type built-in))
