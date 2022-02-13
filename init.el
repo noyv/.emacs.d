@@ -4,6 +4,7 @@
 
 ;; -*- lexical-binding: t -*-
 
+;; init straight
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -17,13 +18,7 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(setq make-backup-files nil)
-(setq auto-save-default nil)
-(setq create-lockfiles nil)
-
-;; (global-auto-revert-mode t)
-;; (delete-selection-mode t)
-
+;; some change to apperence
 (setq-default tab-width 4
               indent-tabs-mode nil)
 
@@ -32,30 +27,14 @@
 (setq initial-scratch-message nil)
 
 (setq custom-safe-themes t)
-(setq split-height-threshold nil)
-(setq split-width-threshold 0)
+;; (setq split-height-threshold nil)
+;; (setq split-width-threshold 0)
 
-(menu-bar-mode -1)
 (column-number-mode t)
-(line-number-mode t)
-(show-paren-mode t)
 (global-hl-line-mode)
 
-(fset 'yes-or-no-p'y-or-n-p)
-
-(savehist-mode)
-
-(recentf-mode t)
-(add-to-list 'recentf-exclude "\\elpa")
-(setq recentf-max-menu-items 32)
-(setq recentf-max-saved-items 32)
-
-(when (memq window-system '(mac ns x))
-  (straight-use-package 'exec-path-from-shell)
-  (exec-path-from-shell-initialize))
-
 (defun local-graphic-config()
-  (add-to-list 'default-frame-alist '(font . "Iosevka-18"))
+  (add-to-list 'default-frame-alist '(font . "Iosevka-14"))
   (load-theme 'modus-operandi t)
   (straight-use-package 'valign)
   (add-hook 'org-mode-hook 'valign-mode))
@@ -68,18 +47,23 @@
     (local-graphic-config)
   (local-terminal-config))
 
+(when (memq window-system '(mac ns x))
+  (straight-use-package 'exec-path-from-shell)
+  (exec-path-from-shell-initialize))
+
+(fset 'yes-or-no-p'y-or-n-p)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq create-lockfiles nil)
+
+(savehist-mode)
+
 (straight-use-package 'bind-key)
-(straight-use-package 'sudo-edit)
-
-(straight-use-package 'smartparens)
-(add-hook 'prog-mode-hook 'smartparens-mode)
-
-(straight-use-package 'markdown-mode)
-(straight-use-package 'yaml-mode)
 
 (straight-use-package 'general)
 (general-create-definer general-leader-def
-  :states '(normal insert emacs)
+  :states 'normal
+  :keymaps 'override
   :prefix "SPC"
   :non-normal-prefix "M-SPC"
   :prefix-command 'leader-prefix-command
@@ -87,6 +71,19 @@
 (general-leader-def "<SPC>" 'execute-extended-command)
 (general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
 (general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
+
+(recentf-mode t)
+(add-to-list 'recentf-exclude "\\elpa")
+(setq recentf-max-menu-items 32)
+(setq recentf-max-saved-items 32)
+
+(setq dired-recursive-deletes 'always)
+(setq delete-by-moving-to-trash t)
+
+(straight-use-package 'sudo-edit)
+
+(straight-use-package 'smartparens)
+(add-hook 'prog-mode-hook 'smartparens-mode)
 
 (straight-use-package 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
@@ -113,15 +110,46 @@
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-file consult--source-project-file consult--source-bookmark
+   consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
    :preview-key (kbd "M-.")))
-(defun consult-line-symbol-at-point ()
-  (interactive)
-  (consult-line (thing-at-point 'symbol)))
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fr" 'consult-buffer)
 (general-leader-def "fe" 'consult-flycheck)
 (general-leader-def "fl" 'consult-line)
+
+(defvar mcfly-commands
+  '(consult-line))
+
+(defvar mcfly-back-commands
+  '(self-insert-command))
+
+(defun mcfly-back-to-present ()
+  (remove-hook 'pre-command-hook 'mcfly-back-to-present t)
+  (cond ((and (memq last-command mcfly-commands)
+              (equal (this-command-keys-vector) (kbd "M-p")))
+         ;; repeat one time to get straight to the first history item
+         (setq unread-command-events
+               (append unread-command-events
+                       (listify-key-sequence (kbd "M-p")))))
+        ((memq this-command mcfly-back-commands)
+         (delete-region
+	  (progn (forward-visible-line 0) (point))
+          (point-max)))))
+
+(defun mcfly-time-travel ()
+  (when (memq this-command mcfly-commands)
+    (insert (propertize (save-excursion
+			  (set-buffer (window-buffer (minibuffer-selected-window)))
+			  (or (seq-some (lambda (thing) (thing-at-point thing t))
+					'(region url symbol sexp))
+			      "No thing at point")
+			  )    'face 'shadow))
+    (add-hook 'pre-command-hook 'mcfly-back-to-present nil t)
+    (forward-visible-line 0)
+    ))
+
+;; setup code
+(add-hook 'minibuffer-setup-hook #'mcfly-time-travel)
 
 (straight-use-package 'embark)
 (bind-key "M-o" 'embark-act)
@@ -151,7 +179,6 @@
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
 (add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
-(setq eldoc-idle-dealy 2)
 (general-leader-def "ca" 'eglot-code-actions)
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
