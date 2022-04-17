@@ -27,17 +27,18 @@
 (setq initial-scratch-message nil)
 
 (setq custom-safe-themes t)
-;; (setq split-height-threshold nil)
-;; (setq split-width-threshold 0)
+(setq split-height-threshold nil)
+(setq split-width-threshold 0)
 
 (column-number-mode t)
 (global-hl-line-mode)
 
-(defun local-graphic-config()
-  (add-to-list 'default-frame-alist '(font . "Iosevka-14"))
-  (load-theme 'modus-operandi t)
-  (straight-use-package 'valign)
-  (add-hook 'org-mode-hook 'valign-mode))
+(add-to-list 'default-frame-alist '(font . "FiraCode-13"))
+(load-theme 'modus-operandi t)
+(straight-use-package 'valign)
+(add-hook 'org-mode-hook 'valign-mode)
+
+(defun local-graphic-config())
 
 (defun local-terminal-config()
   (straight-use-package 'evil-terminal-cursor-changer)
@@ -57,8 +58,6 @@
 (setq create-lockfiles nil)
 
 (savehist-mode)
-
-(straight-use-package 'bind-key)
 
 (straight-use-package 'general)
 (general-create-definer general-leader-def
@@ -85,10 +84,15 @@
 (straight-use-package 'smartparens)
 (add-hook 'prog-mode-hook 'smartparens-mode)
 
+(straight-use-package 'vterm)
+(straight-use-package 'vterm-toggle)
+(keymap-global-set "s-t" #'vterm-toggle)
+
 (straight-use-package 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
+(evil-set-initial-state 'vterm-mode 'emacs)
 (evil-mode 1)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
 
@@ -96,25 +100,26 @@
 (vertico-mode)
 
 (straight-use-package 'orderless)
-(setq completion-styles '(orderless)
-      completion-category-defaults nil
-      completion-category-overrides '((file (styles partial-completion))))
+(defun sanityinc/use-orderless-in-minibuffer ()
+  (setq-local completion-styles '(substring orderless)))
+(add-hook 'minibuffer-setup-hook 'sanityinc/use-orderless-in-minibuffer)
 
 (straight-use-package 'marginalia)
 (marginalia-mode t)
 
 (straight-use-package 'consult)
-(straight-use-package 'consult-flycheck)
 (with-eval-after-load 'consult
-  (setq consult-buffer-filter '("^ " "\\*Messages\\*" "\\*straight*"))
+  (setq consult-buffer-filter '("^ " "\\*straight*"))
   (consult-customize
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
    consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
    :preview-key (kbd "M-.")))
 (general-leader-def "ff" 'find-file)
+(general-leader-def "fo" 'find-file-other-window)
+(general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
-(general-leader-def "fe" 'consult-flycheck)
+(general-leader-def "fe" 'consult-flymake)
 (general-leader-def "fl" 'consult-line)
 
 (defvar mcfly-commands
@@ -152,7 +157,7 @@
 (add-hook 'minibuffer-setup-hook #'mcfly-time-travel)
 
 (straight-use-package 'embark)
-(bind-key "M-o" 'embark-act)
+(keymap-global-set "M-o" 'embark-act)
 (setq prefix-help-command 'embark-prefix-help-command)
 
 (straight-use-package 'embark-consult)
@@ -178,14 +183,10 @@
 ;; configure eglot
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
-(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
 (general-leader-def "ca" 'eglot-code-actions)
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
 (general-leader-def "cf" 'eglot-format)
-
-(straight-use-package 'flycheck)
-(add-hook 'prog-mode-hook 'flycheck-mode)
 
 ;; when lang c/c++
 (setq c-default-style "linux")
@@ -212,10 +213,6 @@
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
-
-(straight-use-package 'flycheck-golangci-lint)
-(eval-after-load 'flycheck
-  '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
