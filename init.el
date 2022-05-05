@@ -18,6 +18,20 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(defun local-graphic-config())
+
+(defun local-terminal-config()
+  (straight-use-package 'evil-terminal-cursor-changer)
+  (evil-terminal-cursor-changer-activate))
+
+(if (display-graphic-p)
+    (local-graphic-config)
+  (local-terminal-config))
+
+(when (memq window-system '(mac ns x))
+  (straight-use-package 'exec-path-from-shell)
+  (exec-path-from-shell-initialize))
+
 ;; some change to apperence
 (setq-default tab-width 4
               indent-tabs-mode nil)
@@ -33,24 +47,8 @@
 (column-number-mode t)
 (global-hl-line-mode)
 
-(add-to-list 'default-frame-alist '(font . "FiraCode-13"))
+(add-to-list 'default-frame-alist '(font . "FiraCode-11"))
 (load-theme 'modus-operandi t)
-(straight-use-package 'valign)
-(add-hook 'org-mode-hook 'valign-mode)
-
-(defun local-graphic-config())
-
-(defun local-terminal-config()
-  (straight-use-package 'evil-terminal-cursor-changer)
-  (evil-terminal-cursor-changer-activate))
-
-(if (display-graphic-p)
-    (local-graphic-config)
-  (local-terminal-config))
-
-(when (memq window-system '(mac ns x))
-  (straight-use-package 'exec-path-from-shell)
-  (exec-path-from-shell-initialize))
 
 (fset 'yes-or-no-p'y-or-n-p)
 (setq make-backup-files nil)
@@ -59,69 +57,7 @@
 
 (savehist-mode)
 
-(straight-use-package 'general)
-(general-create-definer general-leader-def
-  :states 'normal
-  :keymaps 'override
-  :prefix "SPC"
-  :non-normal-prefix "M-SPC"
-  :prefix-command 'leader-prefix-command
-  :prefix-map 'leader-prefix-map)
-(general-leader-def "<SPC>" 'execute-extended-command)
-(general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
-(general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
-
-(recentf-mode t)
-(add-to-list 'recentf-exclude "\\elpa")
-(setq recentf-max-menu-items 32)
-(setq recentf-max-saved-items 32)
-
-(setq dired-recursive-deletes 'always)
-(setq delete-by-moving-to-trash t)
-
-(straight-use-package 'sudo-edit)
-
-(straight-use-package 'smartparens)
-(add-hook 'prog-mode-hook 'smartparens-mode)
-
-(straight-use-package 'vterm)
-(straight-use-package 'vterm-toggle)
-(keymap-global-set "s-t" #'vterm-toggle)
-
-(straight-use-package 'evil)
-(defalias #'forward-evil-word #'forward-evil-symbol)
-(setq evil-symbol-word-search t)
-(setq evil-undo-system 'undo-redo)
-(evil-set-initial-state 'vterm-mode 'emacs)
-(evil-mode 1)
-(general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
-
-(straight-use-package 'vertico)
-(vertico-mode)
-
-(straight-use-package 'orderless)
-(defun sanityinc/use-orderless-in-minibuffer ()
-  (setq-local completion-styles '(substring orderless)))
-(add-hook 'minibuffer-setup-hook 'sanityinc/use-orderless-in-minibuffer)
-
-(straight-use-package 'marginalia)
-(marginalia-mode t)
-
-(straight-use-package 'consult)
-(with-eval-after-load 'consult
-  (setq consult-buffer-filter '("^ " "\\*straight*"))
-  (consult-customize
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-   :preview-key (kbd "M-.")))
-(general-leader-def "ff" 'find-file)
-(general-leader-def "fo" 'find-file-other-window)
-(general-leader-def "fd" 'dired-jump)
-(general-leader-def "fr" 'consult-buffer)
-(general-leader-def "fe" 'consult-flymake)
-(general-leader-def "fl" 'consult-line)
-
+(fido-vertical-mode t)
 (defvar mcfly-commands
   '(consult-line))
 
@@ -155,6 +91,63 @@
 
 ;; setup code
 (add-hook 'minibuffer-setup-hook #'mcfly-time-travel)
+
+(add-hook 'prog-mode-hook 'flymake-mode)
+
+(recentf-mode t)
+(add-to-list 'recentf-exclude "\\elpa")
+(setq recentf-max-menu-items 32)
+(setq recentf-max-saved-items 32)
+
+(setq dired-recursive-deletes 'always)
+(setq delete-by-moving-to-trash t)
+
+(straight-use-package 'valign)
+(add-hook 'org-mode-hook 'valign-mode)
+
+(straight-use-package 'general)
+(general-create-definer general-leader-def
+  :states 'normal
+  :keymaps 'override
+  :prefix "SPC"
+  :non-normal-prefix "M-SPC"
+  :prefix-command 'leader-prefix-command
+  :prefix-map 'leader-prefix-map)
+(general-leader-def "<SPC>" 'execute-extended-command)
+(general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
+(general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
+
+(straight-use-package 'sudo-edit)
+
+(straight-use-package 'smartparens)
+(add-hook 'prog-mode-hook 'smartparens-mode)
+
+(straight-use-package 'vterm)
+(straight-use-package 'vterm-toggle)
+(keymap-global-set "s-t" #'vterm-toggle)
+
+(straight-use-package 'evil)
+(defalias #'forward-evil-word #'forward-evil-symbol)
+(setq evil-symbol-word-search t)
+(setq evil-undo-system 'undo-redo)
+(evil-mode 1)
+(evil-set-initial-state 'vterm-mode 'emacs)
+(general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
+
+(straight-use-package 'consult)
+(with-eval-after-load 'consult
+  (setq consult-buffer-filter '("^ " "\\*straight*"))
+  (consult-customize
+   consult-ripgrep consult-git-grep consult-grep
+   consult-bookmark consult-recent-file consult-xref
+   consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+   :preview-key (kbd "M-.")))
+(general-leader-def "ff" 'find-file)
+(general-leader-def "fo" 'find-file-other-window)
+(general-leader-def "fd" 'dired-jump)
+(general-leader-def "fr" 'consult-buffer)
+(general-leader-def "fe" 'consult-flymake)
+(general-leader-def "fl" 'consult-line)
 
 (straight-use-package 'embark)
 (keymap-global-set "M-o" 'embark-act)
