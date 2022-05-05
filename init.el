@@ -28,10 +28,6 @@
     (local-graphic-config)
   (local-terminal-config))
 
-(when (memq window-system '(mac ns x))
-  (straight-use-package 'exec-path-from-shell)
-  (exec-path-from-shell-initialize))
-
 ;; some change to apperence
 (setq-default tab-width 4
               indent-tabs-mode nil)
@@ -55,9 +51,11 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 
+(setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
+(add-hook 'prog-mode-hook #'electric-pair-mode)
+
 (savehist-mode)
 
-(fido-vertical-mode t)
 (defvar mcfly-commands
   '(consult-line))
 
@@ -119,9 +117,6 @@
 
 (straight-use-package 'sudo-edit)
 
-(straight-use-package 'smartparens)
-(add-hook 'prog-mode-hook 'smartparens-mode)
-
 (straight-use-package 'vterm)
 (straight-use-package 'vterm-toggle)
 (keymap-global-set "s-t" #'vterm-toggle)
@@ -133,6 +128,13 @@
 (evil-mode 1)
 (evil-set-initial-state 'vterm-mode 'emacs)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
+
+(straight-use-package 'vertico)
+(vertico-mode)
+
+(straight-use-package 'orderless)
+(setq completion-styles '(basic partial-completion orderless)
+        completion-category-overrides '((file (styles basic partial-completion))))
 
 (straight-use-package 'consult)
 (with-eval-after-load 'consult
@@ -170,9 +172,6 @@
 (straight-use-package 'yasnippet-snippets)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
-(straight-use-package 'tree-sitter)
-(straight-use-package 'tree-sitter-langs)
-
 ;; configure eglot
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
@@ -188,21 +187,17 @@
   (c-toggle-hungry-state 1)
   (c-toggle-comment-style -1))
 (add-hook 'c-mode-hook 'eglot-ensure)
-(add-hook 'c-mode-hook 'tree-sitter-hl-mode)
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
 ;; when lang python
 (add-hook 'python-mode-hook 'eglot-ensure)
-(add-hook 'python-mode-hook 'tree-sitter-hl-mode)
 
 ;; when lang js
 (add-hook 'js-mode-hook 'eglot-ensure)
-(add-hook 'js-mode-hook 'tree-sitter-hl-mode)
 
 ;; when lang golang
 (straight-use-package 'go-mode)
 (add-hook 'go-mode-hook 'eglot-ensure)
-(add-hook 'go-mode-hook 'tree-sitter-hl-mode)
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
@@ -210,7 +205,6 @@
 ;; when lang rust
 (straight-use-package 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
-(add-hook 'rust-mode-hook 'tree-sitter-hl-mode)
 
 ;; when lang org
 (straight-use-package '(org :type built-in))
@@ -220,6 +214,12 @@
 (setq-default org-startup-folded 'content)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 
+(straight-use-package '(zk :files (:defaults "zk-consult.el")))
+(setq zk-directory "~/org")
+(setq zk-file-extension "org")
+(zk-setup-embark)
+(setq zk-tag-grep-function #'zk-consult-grep-tag-search
+      zk-grep-function #'zk-consult-grep)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
