@@ -56,40 +56,6 @@
 
 (savehist-mode)
 
-(defvar mcfly-commands
-  '(consult-line))
-
-(defvar mcfly-back-commands
-  '(self-insert-command))
-
-(defun mcfly-back-to-present ()
-  (remove-hook 'pre-command-hook 'mcfly-back-to-present t)
-  (cond ((and (memq last-command mcfly-commands)
-              (equal (this-command-keys-vector) (kbd "M-p")))
-         ;; repeat one time to get straight to the first history item
-         (setq unread-command-events
-               (append unread-command-events
-                       (listify-key-sequence (kbd "M-p")))))
-        ((memq this-command mcfly-back-commands)
-         (delete-region
-	  (progn (forward-visible-line 0) (point))
-          (point-max)))))
-
-(defun mcfly-time-travel ()
-  (when (memq this-command mcfly-commands)
-    (insert (propertize (save-excursion
-			  (set-buffer (window-buffer (minibuffer-selected-window)))
-			  (or (seq-some (lambda (thing) (thing-at-point thing t))
-					'(region url symbol sexp))
-			      "No thing at point")
-			  )    'face 'shadow))
-    (add-hook 'pre-command-hook 'mcfly-back-to-present nil t)
-    (forward-visible-line 0)
-    ))
-
-;; setup code
-(add-hook 'minibuffer-setup-hook #'mcfly-time-travel)
-
 (add-hook 'prog-mode-hook 'flymake-mode)
 
 (recentf-mode t)
@@ -143,13 +109,31 @@
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
    consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-   :preview-key (kbd "M-.")))
+   :preview-key (kbd "M-."))
+
+  (consult-customize
+   consult-line
+   :add-history (seq-some #'thing-at-point '(region symbol)))
+ 
+  (defalias 'consult-line-thing-at-point 'consult-line)
+
+  (consult-customize
+   consult-line-thing-at-point
+   :initial (thing-at-point 'symbol)))
+
+(setq completion-in-region-function
+      (lambda (&rest args)
+        (apply (if vertico-mode
+                   #'consult-completion-in-region
+                 #'completion--in-region)
+               args)))
+
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fo" 'find-file-other-window)
 (general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
 (general-leader-def "fe" 'consult-flymake)
-(general-leader-def "fl" 'consult-line)
+(general-leader-def "fl" 'consult-line-thing-at-point)
 
 (straight-use-package 'embark)
 (keymap-global-set "M-o" 'embark-act)
@@ -161,15 +145,12 @@
 (straight-use-package 'avy)
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
-(straight-use-package 'company)
-(global-company-mode)
-(setq company-show-numbers t)
-(setq company-idle-delay 0.1)
-(setq company-minimum-prefix-length 2)
-(setq company-tooltip-limit 20)
+(straight-use-package 'corfu)
+(global-corfu-mode)
+(setq corfu-auto t
+      corfu-quit-no-match 'separator)
 
 (straight-use-package 'yasnippet)
-(straight-use-package 'yasnippet-snippets)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
 ;; configure eglot
@@ -190,7 +171,7 @@
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
 ;; when lang python
-(add-hook 'python-mode-hook 'eglot-ensure)
+;; (add-hook 'python-mode-hook 'eglot-ensure)
 
 ;; when lang js
 (add-hook 'js-mode-hook 'eglot-ensure)
