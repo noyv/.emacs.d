@@ -18,27 +18,18 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-(defun local-graphic-config())
-
-(defun local-terminal-config()
-  (straight-use-package 'evil-terminal-cursor-changer)
-  (evil-terminal-cursor-changer-activate))
-
-(if (display-graphic-p)
-    (local-graphic-config)
-  (local-terminal-config))
-
-;; some change to apperence
-(setq-default tab-width 4
-              indent-tabs-mode nil)
-
+(setq-default tab-width 4)
+(setq-default indent-tabs-mode nil)
 (setq inhibit-startup-screen t)
 (setq initial-major-mode 'fundamental-mode)
 (setq initial-scratch-message nil)
-
 (setq custom-safe-themes t)
 (setq split-height-threshold nil)
 (setq split-width-threshold 0)
+(fset 'yes-or-no-p'y-or-n-p)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq create-lockfiles nil)
 
 (column-number-mode t)
 (global-hl-line-mode)
@@ -46,17 +37,10 @@
 (add-to-list 'default-frame-alist '(font . "FiraCode-11"))
 (load-theme 'modus-operandi t)
 
-(fset 'yes-or-no-p'y-or-n-p)
-(setq make-backup-files nil)
-(setq auto-save-default nil)
-(setq create-lockfiles nil)
-
 (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
 
 (savehist-mode)
-
-(add-hook 'prog-mode-hook 'flymake-mode)
 
 (recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
@@ -88,21 +72,25 @@
 (keymap-global-set "s-t" #'vterm-toggle)
 
 (straight-use-package 'evil)
+(straight-use-package 'evil-terminal-cursor-changer)
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
 (evil-mode 1)
 (evil-set-initial-state 'vterm-mode 'emacs)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
+(unless (display-graphic-p)
+  (evil-terminal-cursor-changer-activate))
 
 (straight-use-package 'vertico)
 (vertico-mode)
 
 (straight-use-package 'orderless)
 (setq completion-styles '(basic partial-completion orderless)
-        completion-category-overrides '((file (styles basic partial-completion))))
+      completion-category-overrides '((file (styles basic partial-completion))))
 
 (straight-use-package 'consult)
+(straight-use-package 'consult-flycheck)
 (with-eval-after-load 'consult
   (setq consult-buffer-filter '("^ " "\\*straight*"))
   (consult-customize
@@ -114,25 +102,18 @@
   (consult-customize
    consult-line
    :add-history (seq-some #'thing-at-point '(region symbol)))
- 
+
   (defalias 'consult-line-thing-at-point 'consult-line)
 
   (consult-customize
    consult-line-thing-at-point
    :initial (thing-at-point 'symbol)))
 
-(setq completion-in-region-function
-      (lambda (&rest args)
-        (apply (if vertico-mode
-                   #'consult-completion-in-region
-                 #'completion--in-region)
-               args)))
-
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fo" 'find-file-other-window)
 (general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
-(general-leader-def "fe" 'consult-flymake)
+(general-leader-def "fe" 'consult-flycheck)
 (general-leader-def "fl" 'consult-line-thing-at-point)
 
 (straight-use-package 'embark)
@@ -148,14 +129,27 @@
 (straight-use-package 'corfu)
 (global-corfu-mode)
 (setq corfu-auto t
+      corfu-auto-prefix 2
       corfu-quit-no-match 'separator)
+
+(straight-use-package
+ '(popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
+(straight-use-package
+ '(corfu-popup :type git
+               :repo "https://codeberg.org/akib/emacs-corfu-popup.git"))
+(unless (display-graphic-p)
+  (corfu-popup-mode +1))
 
 (straight-use-package 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
+(straight-use-package 'flycheck)
+(add-hook 'prog-mode-hook 'flycheck-mode)
+
 ;; configure eglot
 (straight-use-package 'eglot)
 (setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
+(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
 (general-leader-def "ca" 'eglot-code-actions)
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
@@ -182,6 +176,9 @@
 (setq-default eglot-workspace-configuration
               '((gopls
                  (usePlaceholders . t))))
+(straight-use-package 'flycheck-golangci-lint)
+(add-hook 'go-mode-hook #'flycheck-golangci-lint-setup)
+(setq flycheck-golangci-lint-enable-all t)
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
@@ -195,12 +192,13 @@
 (setq-default org-startup-folded 'content)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 
-(straight-use-package '(zk :files (:defaults "zk-consult.el")))
-(setq zk-directory "~/org")
-(setq zk-file-extension "org")
-(zk-setup-embark)
-(setq zk-tag-grep-function #'zk-consult-grep-tag-search
-      zk-grep-function #'zk-consult-grep)
+(straight-use-package 'emacsql-sqlite-builtin)
+(straight-use-package 'org-roam)
+(setq org-roam-directory (file-truename "~/org/"))
+(setq org-roam-db-location "~/org/org-roam.db")
+(setq org-roam-database-connector 'sqlite-builtin)
+(setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+;; (org-roam-db-autosync-mode)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
