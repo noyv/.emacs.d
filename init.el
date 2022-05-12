@@ -30,6 +30,8 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
+(setq exec-path (append exec-path '("/usr/local/go/bin/" "~/go/bin/")))
+(setenv "PATH" (concat "/usr/local/go/bin/:~/go/bin/" (getenv "PATH")))
 
 (column-number-mode t)
 (global-hl-line-mode)
@@ -179,6 +181,10 @@
 (straight-use-package 'flycheck-golangci-lint)
 (add-hook 'go-mode-hook #'flycheck-golangci-lint-setup)
 (setq flycheck-golangci-lint-enable-all t)
+(straight-use-package 'go-tag)
+(straight-use-package 'go-gen-test)
+(straight-use-package 'gotest)
+(setq go-test-verbose t)
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
