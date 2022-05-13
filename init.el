@@ -32,6 +32,9 @@
 (setq create-lockfiles nil)
 (setq exec-path (append exec-path '("/usr/local/go/bin/" "~/go/bin/")))
 (setenv "PATH" (concat "/usr/local/go/bin/:~/go/bin/" (getenv "PATH")))
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(setq default-buffer-file-coding-system 'utf-8)
 
 (column-number-mode t)
 (global-hl-line-mode)
@@ -52,9 +55,6 @@
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
 
-(straight-use-package 'valign)
-(add-hook 'org-mode-hook 'valign-mode)
-
 (straight-use-package 'general)
 (general-create-definer general-leader-def
   :states 'normal
@@ -74,13 +74,14 @@
 (keymap-global-set "s-t" #'vterm-toggle)
 
 (straight-use-package 'evil)
-(straight-use-package 'evil-terminal-cursor-changer)
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
 (evil-mode 1)
 (evil-set-initial-state 'vterm-mode 'emacs)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
+
+(straight-use-package 'evil-terminal-cursor-changer)
 (unless (display-graphic-p)
   (evil-terminal-cursor-changer-activate))
 
@@ -190,6 +191,10 @@
 (straight-use-package 'rust-mode)
 (add-hook 'rust-mode-hook 'eglot-ensure)
 
+(straight-use-package 'plantuml-mode)
+(setq plantuml-exec-mode 'server)
+(setq plantuml-server-url "http://172.16.0.201:9000")
+
 ;; when lang org
 (straight-use-package '(org :type built-in))
 (setq-default org-export-with-toc nil)
@@ -197,9 +202,16 @@
 (setq-default org-html-head-include-default-style nil)
 (setq-default org-startup-folded 'content)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+  '((plantuml . t))) ; this line activates plantuml
 
-(straight-use-package 'emacsql-sqlite-builtin)
+(straight-use-package 'valign)
+(when (display-graphic-p)
+  (add-hook 'org-mode-hook 'valign-mode))
+
 (straight-use-package 'org-roam)
+(straight-use-package 'emacsql-sqlite-builtin)
 (setq org-roam-directory (file-truename "~/org/"))
 (setq org-roam-db-location "~/org/org-roam.db")
 (setq org-roam-database-connector 'sqlite-builtin)
