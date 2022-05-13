@@ -34,7 +34,7 @@
 (setenv "PATH" (concat "/usr/local/go/bin/:~/go/bin/" (getenv "PATH")))
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
-(setq default-buffer-file-coding-system 'utf-8)
+(setq debug-on-error t)
 
 (column-number-mode t)
 (global-hl-line-mode)
@@ -42,16 +42,19 @@
 (add-to-list 'default-frame-alist '(font . "FiraCode-11"))
 (load-theme 'modus-operandi t)
 
+(require 'elec-pair)
 (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
 
 (savehist-mode)
 
+(require 'recentf)
 (recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
 (setq recentf-max-menu-items 32)
 (setq recentf-max-saved-items 32)
 
+(require 'dired)
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
 
@@ -162,6 +165,7 @@
 (setq c-default-style "linux")
 (setq c-basic-offset 4)
 (defun my/c-mode-hook()
+  "Local config for c mode."
   (c-toggle-hungry-state 1)
   (c-toggle-comment-style -1))
 (add-hook 'c-mode-hook 'eglot-ensure)
@@ -197,14 +201,18 @@
 
 ;; when lang org
 (straight-use-package '(org :type built-in))
+(require 'org)
+(setq org-startup-folded 'content)
 (setq-default org-export-with-toc nil)
 (setq-default org-export-with-section-numbers nil)
 (setq-default org-html-head-include-default-style nil)
-(setq-default org-startup-folded 'content)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
+
+(require 'ob-plantuml)
+(setq org-plantuml-jar-path "~/org/plantuml.jar")
 (org-babel-do-load-languages
  'org-babel-load-languages
-  '((plantuml . t))) ; this line activates plantuml
+ '((plantuml . t))) ; this line activates plantuml
 
 (straight-use-package 'valign)
 (when (display-graphic-p)
