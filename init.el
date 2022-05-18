@@ -18,6 +18,7 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
+(menu-bar-mode -1)
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 (setq inhibit-startup-screen t)
@@ -34,7 +35,6 @@
 (setenv "PATH" (concat "/usr/local/go/bin/:~/go/bin/" (getenv "PATH")))
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
-(setq debug-on-error t)
 
 (column-number-mode t)
 (global-hl-line-mode)
@@ -203,10 +203,16 @@
 (straight-use-package '(org :type built-in))
 (require 'org)
 (setq org-startup-folded 'content)
-(setq-default org-export-with-toc nil)
-(setq-default org-export-with-section-numbers nil)
-(setq-default org-html-head-include-default-style nil)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
+
+(require 'org-id)
+(setq org-id-locations-file (convert-standard-filename
+                             "~/org/.org-id-locations"))
+
+(require 'ox)
+(setq org-export-with-toc nil)
+(setq org-export-with-section-numbers nil)
+(setq org-html-head-include-default-style nil)
 
 (require 'ob-plantuml)
 (setq org-plantuml-jar-path "~/org/plantuml.jar")
