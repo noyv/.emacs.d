@@ -32,7 +32,7 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 (setq exec-path (append exec-path '("/usr/local/go/bin/" "~/go/bin/")))
-(setenv "PATH" (concat "/usr/local/go/bin/:~/go/bin/" (getenv "PATH")))
+(setenv "PATH" (concat "/usr/local/go/bin/" ":" "~/go/bin/" ":" (getenv "PATH")))
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 
@@ -46,8 +46,6 @@
 (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
 
-(savehist-mode)
-
 (require 'recentf)
 (recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
@@ -57,6 +55,9 @@
 (require 'dired)
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
+
+(straight-use-package 'sudo-edit)
+(straight-use-package 'valign)
 
 (straight-use-package 'general)
 (general-create-definer general-leader-def
@@ -70,18 +71,19 @@
 (general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
 (general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
 
-(straight-use-package 'sudo-edit)
-
 (straight-use-package 'vterm)
 (straight-use-package 'vterm-toggle)
 (keymap-global-set "s-t" #'vterm-toggle)
 
 (straight-use-package 'evil)
+(require 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
 (evil-mode 1)
 (evil-set-initial-state 'vterm-mode 'emacs)
+
+(require 'xref)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
 
 (straight-use-package 'evil-terminal-cursor-changer)
@@ -96,30 +98,30 @@
       completion-category-overrides '((file (styles basic partial-completion))))
 
 (straight-use-package 'consult)
-(straight-use-package 'consult-flycheck)
-(with-eval-after-load 'consult
-  (setq consult-buffer-filter '("^ " "\\*straight*"))
-  (consult-customize
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-   :preview-key (kbd "M-."))
+(require 'consult)
+(setq consult-buffer-filter '("^ " "\\*straight*"))
+(savehist-mode)
+(consult-customize
+ consult-ripgrep consult-git-grep consult-grep
+ consult-bookmark consult-recent-file consult-xref
+ consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+ :preview-key (kbd "M-."))
 
-  (consult-customize
-   consult-line
-   :add-history (seq-some #'thing-at-point '(region symbol)))
+(consult-customize
+ consult-line
+ :add-history (seq-some #'thing-at-point '(region symbol)))
 
-  (defalias 'consult-line-thing-at-point 'consult-line)
+(defalias 'consult-line-thing-at-point 'consult-line)
 
-  (consult-customize
-   consult-line-thing-at-point
-   :initial (thing-at-point 'symbol)))
+(consult-customize
+ consult-line-thing-at-point
+ :initial (thing-at-point 'symbol))
 
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fo" 'find-file-other-window)
 (general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
-(general-leader-def "fe" 'consult-flycheck)
+(general-leader-def "fe" 'consult-flymake)
 (general-leader-def "fl" 'consult-line-thing-at-point)
 
 (straight-use-package 'embark)
@@ -138,24 +140,30 @@
       corfu-auto-prefix 2
       corfu-quit-no-match 'separator)
 
-(straight-use-package
- '(popon :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
-(straight-use-package
- '(corfu-popup :type git
-               :repo "https://codeberg.org/akib/emacs-corfu-popup.git"))
+(straight-use-package '(popon       :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
+(straight-use-package '(corfu-popup :type git :repo "https://codeberg.org/akib/emacs-corfu-popup.git"))
 (unless (display-graphic-p)
   (corfu-popup-mode +1))
 
 (straight-use-package 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
-(straight-use-package 'flycheck)
-(add-hook 'prog-mode-hook 'flycheck-mode)
+(require 'flymake)
+(add-hook 'prog-mode-hook 'flymake-mode)
 
 ;; configure eglot
 (straight-use-package 'eglot)
-(setq-default eglot-ignored-server-capabilites '(:documentHighlightProvider))
-(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
+(setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
+(setq eglot-events-buffer-size 0)
+(setq eglot-stay-out-of '(flymake))
+(setq eglot-workspace-configuration
+              '((gopls
+                 (usePlaceholders . t))))
+(add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'go-mode-hook 'eglot-ensure)
+(add-hook 'rust-mode-hook 'eglot-ensure)
+(add-hook 'js-mode-hook 'eglot-ensure)
+(add-hook 'python-mode-hook 'eglot-ensure)
 (general-leader-def "ca" 'eglot-code-actions)
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
@@ -168,32 +176,15 @@
   "Local config for c mode."
   (c-toggle-hungry-state 1)
   (c-toggle-comment-style -1))
-(add-hook 'c-mode-hook 'eglot-ensure)
 (add-hook 'c-mode-hook 'my/c-mode-hook)
-
-;; when lang python
-;; (add-hook 'python-mode-hook 'eglot-ensure)
-
-;; when lang js
-(add-hook 'js-mode-hook 'eglot-ensure)
 
 ;; when lang golang
 (straight-use-package 'go-mode)
-(add-hook 'go-mode-hook 'eglot-ensure)
-(setq-default eglot-workspace-configuration
-              '((gopls
-                 (usePlaceholders . t))))
-(straight-use-package 'flycheck-golangci-lint)
-(add-hook 'go-mode-hook #'flycheck-golangci-lint-setup)
-(setq flycheck-golangci-lint-enable-all t)
+(setq gofmt-command "goimports")
 (straight-use-package 'go-tag)
-(straight-use-package 'go-gen-test)
-(straight-use-package 'gotest)
-(setq go-test-verbose t)
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
-(add-hook 'rust-mode-hook 'eglot-ensure)
 
 (straight-use-package 'plantuml-mode)
 (setq plantuml-exec-mode 'server)
@@ -219,10 +210,6 @@
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((plantuml . t))) ; this line activates plantuml
-
-(straight-use-package 'valign)
-(when (display-graphic-p)
-  (add-hook 'org-mode-hook 'valign-mode))
 
 (straight-use-package 'org-roam)
 (straight-use-package 'emacsql-sqlite-builtin)
