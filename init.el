@@ -56,6 +56,11 @@
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
 
+(require 'isearch)
+(setq isearch-lazy-count t)
+(setq lazy-count-prefix-format nil)
+(setq lazy-count-suffix-format " [%s/%s]")
+
 (straight-use-package 'sudo-edit)
 (straight-use-package 'valign)
 
