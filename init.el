@@ -17,7 +17,7 @@
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+    (load bootstrap-file nil 'nomessage))
 
 (menu-bar-mode -1)
 (setq-default tab-width 4)
