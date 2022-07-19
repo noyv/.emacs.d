@@ -6,13 +6,14 @@
 
 ;; init straight
 (defvar bootstrap-version)
+(setq straight-repository-branch "develop")
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
+      (bootstrap-version 6))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
@@ -145,10 +146,10 @@
       corfu-auto-prefix 2
       corfu-quit-no-match 'separator)
 
-(straight-use-package '(popon       :type git :repo "https://codeberg.org/akib/emacs-popon.git"))
-(straight-use-package '(corfu-popup :type git :repo "https://codeberg.org/akib/emacs-corfu-popup.git"))
+(straight-use-package 'popon)
+(straight-use-package 'corfu-terminal)
 (unless (display-graphic-p)
-  (corfu-popup-mode +1))
+  (corfu-terminal-mode +1))
 
 (straight-use-package 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
@@ -162,8 +163,8 @@
 (setq eglot-events-buffer-size 0)
 (setq eglot-stay-out-of '(flymake))
 (setq eglot-workspace-configuration
-              '((gopls
-                 (usePlaceholders . t))))
+      '((gopls
+         (usePlaceholders . t))))
 (add-hook 'c-mode-hook 'eglot-ensure)
 (add-hook 'go-mode-hook 'eglot-ensure)
 (add-hook 'rust-mode-hook 'eglot-ensure)
@@ -188,6 +189,10 @@
 (setq gofmt-command "goimports")
 (straight-use-package 'go-tag)
 
+(add-to-list 'load-path "~/.config/emacs/site-lisp/")
+(require 'flymake-go-gcl)
+(add-hook 'go-mode-hook 'flymake-golangci-lint-setup-backend)
+
 ;; when lang rust
 (straight-use-package 'rust-mode)
 
@@ -207,7 +212,7 @@
 
 (require 'ox)
 (setq org-export-with-toc nil)
-(setq org-export-with-section-numbers nil)
+;; (setq org-export-with-section-numbers nil)
 (setq org-html-head-include-default-style nil)
 
 (require 'ob-plantuml)
@@ -216,13 +221,7 @@
  'org-babel-load-languages
  '((plantuml . t))) ; this line activates plantuml
 
-(straight-use-package 'org-roam)
-(straight-use-package 'emacsql-sqlite-builtin)
-(setq org-roam-directory (file-truename "~/org/"))
-(setq org-roam-db-location "~/org/org-roam.db")
-(setq org-roam-database-connector 'sqlite-builtin)
-(setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-;; (org-roam-db-autosync-mode)
+(straight-use-package 'denote)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
