@@ -165,11 +165,6 @@
 (setq eglot-workspace-configuration
       '((gopls
          (usePlaceholders . t))))
-(add-hook 'c-mode-hook 'eglot-ensure)
-(add-hook 'go-mode-hook 'eglot-ensure)
-(add-hook 'rust-mode-hook 'eglot-ensure)
-(add-hook 'js-mode-hook 'eglot-ensure)
-(add-hook 'python-mode-hook 'eglot-ensure)
 (general-leader-def "ca" 'eglot-code-actions)
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
@@ -188,10 +183,6 @@
 (straight-use-package 'go-mode)
 (setq gofmt-command "goimports")
 (straight-use-package 'go-tag)
-
-(add-to-list 'load-path "~/.config/emacs/site-lisp/")
-(require 'flymake-go-gcl)
-(add-hook 'go-mode-hook 'flymake-golangci-lint-setup-backend)
 
 ;; when lang rust
 (straight-use-package 'rust-mode)
