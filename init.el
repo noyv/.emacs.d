@@ -4,20 +4,41 @@
 
 ;; -*- lexical-binding: t -*-
 
-;; init straight
-(defvar bootstrap-version)
-(setq straight-repository-branch "develop")
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+(require 'package)
+(setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
+                         ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
+                         ("nongnu" . "http://mirrors.ustc.edu.cn/elpa/nongnu/")))
+
+(defvar package-list '(
+                       avy
+                       consult
+                       corfu
+                       corfu-terminal
+                       eglot
+                       emacsql-sqlite-builtin
+                       embark
+                       embark-consult
+                       evil
+                       evil-terminal-cursor-changer
+                       general
+                       go-mode
+                       go-tag
+                       orderless
+                       org-roam
+                       plantuml-mode
+                       popon
+                       rust-mode
+                       sudo-edit
+                       valign
+                       vertico
+                       vterm
+                       vterm-toggle
+                       yasnippet
+                       ))
+
+(dolist (package package-list)
+  (when (not (package-installed-p package))
+    (package-install package)))
 
 (menu-bar-mode -1)
 (setq-default tab-width 4)
@@ -62,10 +83,7 @@
 (setq lazy-count-prefix-format nil)
 (setq lazy-count-suffix-format " [%s/%s]")
 
-(straight-use-package 'sudo-edit)
-(straight-use-package 'valign)
-
-(straight-use-package 'general)
+(require 'general)
 (general-create-definer general-leader-def
   :states 'normal
   :keymaps 'override
@@ -77,11 +95,8 @@
 (general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
 (general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
 
-(straight-use-package 'vterm)
-(straight-use-package 'vterm-toggle)
 (keymap-global-set "s-t" #'vterm-toggle)
 
-(straight-use-package 'evil)
 (require 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
@@ -92,20 +107,16 @@
 (require 'xref)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
 
-(straight-use-package 'evil-terminal-cursor-changer)
 (unless (display-graphic-p)
   (evil-terminal-cursor-changer-activate))
 
-(straight-use-package 'vertico)
 (vertico-mode)
 
-(straight-use-package 'orderless)
 (setq completion-styles '(basic partial-completion orderless)
       completion-category-overrides '((file (styles basic partial-completion))))
 
-(straight-use-package 'consult)
 (require 'consult)
-(setq consult-buffer-filter '("^ " "\\*straight*"))
+;; (setq consult-buffer-filter '("^ " "\\*straight*"))
 (savehist-mode)
 (consult-customize
  consult-ripgrep consult-git-grep consult-grep
@@ -130,35 +141,27 @@
 (general-leader-def "fe" 'consult-flymake)
 (general-leader-def "fl" 'consult-line-thing-at-point)
 
-(straight-use-package 'embark)
 (keymap-global-set "M-o" 'embark-act)
 (setq prefix-help-command 'embark-prefix-help-command)
 
-(straight-use-package 'embark-consult)
 (add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode)
 
-(straight-use-package 'avy)
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
-(straight-use-package 'corfu)
 (global-corfu-mode)
 (setq corfu-auto t
       corfu-auto-prefix 2
       corfu-quit-no-match 'separator)
 
-(straight-use-package 'popon)
-(straight-use-package 'corfu-terminal)
 (unless (display-graphic-p)
   (corfu-terminal-mode +1))
 
-(straight-use-package 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
 (require 'flymake)
 (add-hook 'prog-mode-hook 'flymake-mode)
 
 ;; configure eglot
-(straight-use-package 'eglot)
 (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
 (setq eglot-events-buffer-size 0)
 (setq eglot-stay-out-of '(flymake))
@@ -180,19 +183,13 @@
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
 ;; when lang golang
-(straight-use-package 'go-mode)
 (setq gofmt-command "goimports")
-(straight-use-package 'go-tag)
 
 ;; when lang rust
-(straight-use-package 'rust-mode)
-
-(straight-use-package 'plantuml-mode)
 (setq plantuml-exec-mode 'server)
 (setq plantuml-server-url "http://172.16.0.201:9000")
 
 ;; when lang org
-(straight-use-package '(org :type built-in))
 (require 'org)
 (setq org-startup-folded 'content)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
@@ -212,7 +209,11 @@
  'org-babel-load-languages
  '((plantuml . t))) ; this line activates plantuml
 
-(straight-use-package 'denote)
+(require 'org-roam)
+(setq org-roam-directory (file-truename "~/org/"))
+(setq org-roam-db-location "~/org/org-roam.db")
+(setq org-roam-database-connector 'sqlite-builtin)
+(setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -221,6 +222,8 @@
  ;; If there is more than one, they won't work right.
  '(evil-disable-insert-state-bindings t)
  '(evil-want-C-u-scroll t)
+ '(package-selected-packages
+   '(org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil-terminal-cursor-changer evil embark-consult eglot corfu-terminal avy))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
