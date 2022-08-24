@@ -4,7 +4,7 @@
 
 ;; -*- lexical-binding: t -*-
 
-(require 'package)
+;; (require 'package)
 (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
                          ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
                          ("nongnu" . "http://mirrors.ustc.edu.cn/elpa/nongnu/")))
@@ -12,14 +12,16 @@
 (defvar package-list '(
                        avy
                        consult
+                       consult-flycheck
                        corfu
                        corfu-terminal
                        eglot
-                       emacsql-sqlite-builtin
                        embark
                        embark-consult
                        evil
                        evil-terminal-cursor-changer
+                       flycheck
+                       flycheck-golangci-lint
                        general
                        go-mode
                        go-tag
@@ -27,12 +29,14 @@
                        org-roam
                        plantuml-mode
                        popon
+                       protobuf-mode
                        rust-mode
                        sudo-edit
                        valign
                        vertico
                        vterm
                        vterm-toggle
+                       yaml-mode
                        yasnippet
                        ))
 
@@ -40,6 +44,7 @@
   (when (not (package-installed-p package))
     (package-install package)))
 
+(setq max-specpdl-size 16384)
 (menu-bar-mode -1)
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
@@ -64,26 +69,26 @@
 (add-to-list 'default-frame-alist '(font . "FiraCode-11"))
 (load-theme 'modus-operandi t)
 
-(require 'elec-pair)
+;; (require 'elec-pair)
 (setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
 
-(require 'recentf)
+;; (require 'recentf)
 (recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
 (setq recentf-max-menu-items 32)
 (setq recentf-max-saved-items 32)
 
-(require 'dired)
+;; (require 'dired)
 (setq dired-recursive-deletes 'always)
 (setq delete-by-moving-to-trash t)
 
-(require 'isearch)
+;; (require 'isearch)
 (setq isearch-lazy-count t)
 (setq lazy-count-prefix-format nil)
 (setq lazy-count-suffix-format " [%s/%s]")
 
-(require 'general)
+;; (require 'general)
 (general-create-definer general-leader-def
   :states 'normal
   :keymaps 'override
@@ -97,48 +102,40 @@
 
 (keymap-global-set "s-t" #'vterm-toggle)
 
-(require 'evil)
+;; (require 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
 (evil-mode 1)
 (evil-set-initial-state 'vterm-mode 'emacs)
 
-(require 'xref)
+;; (require 'xref)
 (general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
 
+;; (require 'evil-terminal-cursor-changer)
 (unless (display-graphic-p)
   (evil-terminal-cursor-changer-activate))
 
+;; (require 'vertico)
 (vertico-mode)
 
 (setq completion-styles '(basic partial-completion orderless)
       completion-category-overrides '((file (styles basic partial-completion))))
 
-(require 'consult)
+;; (require 'consult)
 ;; (setq consult-buffer-filter '("^ " "\\*straight*"))
 (savehist-mode)
-(consult-customize
- consult-ripgrep consult-git-grep consult-grep
- consult-bookmark consult-recent-file consult-xref
- consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
- :preview-key (kbd "M-."))
-
-(consult-customize
- consult-line
- :add-history (seq-some #'thing-at-point '(region symbol)))
-
-(defalias 'consult-line-thing-at-point 'consult-line)
-
-(consult-customize
- consult-line-thing-at-point
- :initial (thing-at-point 'symbol))
+;; (consult-customize
+;; consult-ripgrep consult-git-grep consult-grep
+;; consult-bookmark consult-recent-file consult-xref
+;; consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+;; :preview-key (kbd "M-."))
 
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fo" 'find-file-other-window)
 (general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
-(general-leader-def "fe" 'consult-flymake)
+(general-leader-def "fe" 'consult-flycheck)
 (general-leader-def "fl" 'consult-line-thing-at-point)
 
 (keymap-global-set "M-o" 'embark-act)
@@ -148,20 +145,25 @@
 
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
+;; (require 'corfu)
 (global-corfu-mode)
 (setq corfu-auto t
       corfu-auto-prefix 2
       corfu-quit-no-match 'separator)
 
+;; (require 'corfu-terminal)
 (unless (display-graphic-p)
   (corfu-terminal-mode +1))
 
+;; (require 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
 
-(require 'flymake)
-(add-hook 'prog-mode-hook 'flymake-mode)
+;; (require 'flycheck)
+(add-hook 'prog-mode-hook 'flycheck-mode)
+(eval-after-load 'flycheck
+    '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
-;; configure eglot
+;; (require 'eglot)
 (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
 (setq eglot-events-buffer-size 0)
 (setq eglot-stay-out-of '(flymake))
@@ -182,34 +184,33 @@
   (c-toggle-comment-style -1))
 (add-hook 'c-mode-hook 'my/c-mode-hook)
 
-;; when lang golang
+;; (require 'go-mode)
 (setq gofmt-command "goimports")
 
-;; when lang rust
+;; (require 'rust-mode)
 (setq plantuml-exec-mode 'server)
 (setq plantuml-server-url "http://172.16.0.201:9000")
 
-;; when lang org
-(require 'org)
+;; (require 'org)
 (setq org-startup-folded 'content)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 
-(require 'org-id)
+;; (require 'org-id)
 (setq org-id-locations-file (convert-standard-filename
                              "~/org/.org-id-locations"))
 
-(require 'ox)
+;; (require 'ox)
 (setq org-export-with-toc nil)
 ;; (setq org-export-with-section-numbers nil)
 (setq org-html-head-include-default-style nil)
 
-(require 'ob-plantuml)
+;; (require 'ob-plantuml)
 (setq org-plantuml-jar-path "~/org/plantuml.jar")
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((plantuml . t))) ; this line activates plantuml
 
-(require 'org-roam)
+;; (require 'org-roam)
 (setq org-roam-directory (file-truename "~/org/"))
 (setq org-roam-db-location "~/org/org-roam.db")
 (setq org-roam-database-connector 'sqlite-builtin)
