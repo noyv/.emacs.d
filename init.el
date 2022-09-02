@@ -23,8 +23,10 @@
                        flycheck
                        flycheck-golangci-lint
                        general
+                       go-impl
                        go-mode
                        go-tag
+                       gotest
                        orderless
                        org-roam
                        plantuml-mode
@@ -186,6 +188,7 @@
 
 ;; (require 'go-mode)
 (setq gofmt-command "goimports")
+(setq go-test-args "-v -count=1")
 
 ;; (require 'rust-mode)
 (setq plantuml-exec-mode 'server)
@@ -213,7 +216,6 @@
 ;; (require 'org-roam)
 (setq org-roam-directory (file-truename "~/org/"))
 (setq org-roam-db-location "~/org/org-roam.db")
-(setq org-roam-database-connector 'sqlite-builtin)
 (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 
 (custom-set-variables
