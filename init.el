@@ -9,40 +9,37 @@
                          ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
                          ("nongnu" . "http://mirrors.ustc.edu.cn/elpa/nongnu/")))
 
-(defvar package-list '(
-                       avy
-                       consult
-                       consult-flycheck
-                       corfu
-                       corfu-terminal
-                       eglot
-                       embark
-                       embark-consult
-                       evil
-                       evil-terminal-cursor-changer
-                       flycheck
-                       flycheck-golangci-lint
-                       general
-                       go-impl
-                       go-mode
-                       go-tag
-                       gotest
-                       orderless
-                       org-roam
-                       plantuml-mode
-                       popon
-                       protobuf-mode
-                       rust-mode
-                       sudo-edit
-                       valign
-                       vertico
-                       vterm
-                       vterm-toggle
-                       yaml-mode
-                       yasnippet
-                       ))
+(setq package-selected-packages '(
+                                  avy
+                                  consult
+                                  consult-flycheck
+                                  corfu
+                                  corfu-terminal
+                                  eglot
+                                  evil
+                                  evil-terminal-cursor-changer
+                                  flycheck
+                                  flycheck-golangci-lint
+                                  general
+                                  go-impl
+                                  go-mode
+                                  go-tag
+                                  gotest
+                                  orderless
+                                  org-roam
+                                  plantuml-mode
+                                  protobuf-mode
+                                  rust-mode
+                                  sudo-edit
+                                  valign
+                                  vertico
+                                  vterm
+                                  vterm-toggle
+                                  yaml-mode
+                                  yasnippet
+                                  ))
 
-(dolist (package package-list)
+(dolist (package package-selected-packages)
   (when (not (package-installed-p package))
     (package-install package)))
 
@@ -68,7 +65,7 @@
 (column-number-mode t)
 (global-hl-line-mode)
 
-(add-to-list 'default-frame-alist '(font . "FiraCode-11"))
+(add-to-list 'default-frame-alist '(font . "FiraCode-14"))
 (load-theme 'modus-operandi t)
 
 ;; (require 'elec-pair)
@@ -108,6 +105,8 @@
 (defalias #'forward-evil-word #'forward-evil-symbol)
 (setq evil-symbol-word-search t)
 (setq evil-undo-system 'undo-redo)
+(setq evil-disable-insert-state-bindings t)
+(setq evil-want-C-u-scroll t)
 (evil-mode 1)
 (evil-set-initial-state 'vterm-mode 'emacs)
 
@@ -163,7 +162,7 @@
 ;; (require 'flycheck)
 (add-hook 'prog-mode-hook 'flycheck-mode)
 (eval-after-load 'flycheck
-    '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
+  '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
 ;; (require 'eglot)
 (setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
@@ -223,10 +222,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(evil-disable-insert-state-bindings t)
- '(evil-want-C-u-scroll t)
- '(package-selected-packages
-   '(org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil-terminal-cursor-changer evil embark-consult eglot corfu-terminal avy))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
