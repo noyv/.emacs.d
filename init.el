@@ -25,6 +25,7 @@
                                   go-mode
                                   go-tag
                                   gotest
+                                  magit
                                   orderless
                                   org-roam
                                   plantuml-mode
@@ -123,26 +124,17 @@
 (setq completion-styles '(basic partial-completion orderless)
       completion-category-overrides '((file (styles basic partial-completion))))
 
-;; (require 'consult)
-;; (setq consult-buffer-filter '("^ " "\\*straight*"))
+(require 'consult)
 (savehist-mode)
-;; (consult-customize
-;; consult-ripgrep consult-git-grep consult-grep
-;; consult-bookmark consult-recent-file consult-xref
-;; consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-;; :preview-key (kbd "M-."))
 
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fo" 'find-file-other-window)
 (general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
 (general-leader-def "fe" 'consult-flycheck)
-(general-leader-def "fl" 'consult-line-thing-at-point)
-
-(keymap-global-set "M-o" 'embark-act)
-(setq prefix-help-command 'embark-prefix-help-command)
-
-(add-hook 'embark-collect-mode-hook 'embark-consult-preview-minor-mode)
+(general-leader-def "fl" 'consult-line)
+(consult-customize consult-ripgrep
+                   :initial (consult--async-split-initial (thing-at-point 'symbol)))
 
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
@@ -222,6 +214,8 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(magit org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil-terminal-cursor-changer evil eglot corfu-terminal avy flycheck yaml-mode protobuf-mode gotest go-impl flycheck-golangci-lint consult-flycheck))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
