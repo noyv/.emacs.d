@@ -17,6 +17,7 @@
                                   corfu-terminal
                                   eglot
                                   evil
+                                  evil-collection
                                   evil-terminal-cursor-changer
                                   flycheck
                                   flycheck-golangci-lint
@@ -67,6 +68,7 @@
 (global-hl-line-mode)
 
 (add-to-list 'default-frame-alist '(font . "FiraCode-14"))
+
 (load-theme 'modus-operandi t)
 
 ;; (require 'elec-pair)
@@ -76,8 +78,8 @@
 ;; (require 'recentf)
 (recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
-(setq recentf-max-menu-items 32)
-(setq recentf-max-saved-items 32)
+(setq recentf-max-menu-items 128)
+(setq recentf-max-saved-items 128)
 
 ;; (require 'dired)
 (setq dired-recursive-deletes 'always)
@@ -108,11 +110,11 @@
 (setq evil-undo-system 'undo-redo)
 (setq evil-disable-insert-state-bindings t)
 (setq evil-want-C-u-scroll t)
+(setq evil-want-keybinding nil)
 (evil-mode 1)
-(evil-set-initial-state 'vterm-mode 'emacs)
 
-;; (require 'xref)
-(general-def 'normal xref--xref-buffer-mode-map "RET" #'xref-goto-xref-and-quit :keymaps 'override)
+;; (require 'evil-collection)
+(evil-collection-init)
 
 ;; (require 'evil-terminal-cursor-changer)
 (unless (display-graphic-p)
@@ -136,6 +138,7 @@
 (consult-customize consult-ripgrep
                    :initial (consult--async-split-initial (thing-at-point 'symbol)))
 
+;; (require 'avy)
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
 ;; (require 'corfu)
@@ -167,15 +170,6 @@
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
 (general-leader-def "cf" 'eglot-format)
-
-;; when lang c/c++
-(setq c-default-style "linux")
-(setq c-basic-offset 4)
-(defun my/c-mode-hook()
-  "Local config for c mode."
-  (c-toggle-hungry-state 1)
-  (c-toggle-comment-style -1))
-(add-hook 'c-mode-hook 'my/c-mode-hook)
 
 ;; (require 'go-mode)
 (setq gofmt-command "goimports")
@@ -215,7 +209,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(magit org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil-terminal-cursor-changer evil eglot corfu-terminal avy flycheck yaml-mode protobuf-mode gotest go-impl flycheck-golangci-lint consult-flycheck))
+   '(evil-collection magit org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil-terminal-cursor-changer evil eglot corfu-terminal avy flycheck yaml-mode protobuf-mode gotest go-impl flycheck-golangci-lint consult-flycheck))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
