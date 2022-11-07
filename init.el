@@ -16,8 +16,6 @@
                                   corfu
                                   corfu-terminal
                                   evil
-                                  evil-collection
-                                  evil-terminal-cursor-changer
                                   flycheck
                                   flycheck-golangci-lint
                                   general
@@ -111,13 +109,6 @@
 (setq evil-want-keybinding nil)
 (evil-mode 1)
 
-;; (require 'evil-collection)
-(evil-collection-init)
-
-;; (require 'evil-terminal-cursor-changer)
-(unless (display-graphic-p)
-  (evil-terminal-cursor-changer-activate))
-
 ;; (require 'vertico)
 (vertico-mode)
 
@@ -207,7 +198,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(blamer evil-collection org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil-terminal-cursor-changer evil corfu-terminal avy flycheck yaml-mode protobuf-mode gotest go-impl flycheck-golangci-lint consult-flycheck))
+   '(blamer org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil corfu-terminal avy flycheck yaml-mode protobuf-mode gotest go-impl flycheck-golangci-lint consult-flycheck))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
