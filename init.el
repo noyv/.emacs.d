@@ -21,42 +21,37 @@
 (column-number-mode t)
 (global-hl-line-mode)
 
-(custom-set-variables
- '(inhibit-startup-screen t)
- '(initial-major-mode 'fundamental-mode)
- '(initial-scratch-message nil)
- '(split-height-threshold nil)
- '(split-width-threshold 0)
- '(make-backup-files nil)
- '(auto-save-default nil)
- '(custom-safe-themes t))
+(setq inhibit-startup-screen t)
+(setq initial-major-mode 'fundamental-mode)
+(setq initial-scratch-message nil)
+(setq split-height-threshold nil)
+(setq split-width-threshold 0)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+;; (setq custom-safe-themes t))
 
 (add-to-list 'default-frame-alist '(font . "FiraCode-14"))
 
-(load-theme 'modus-operandi t)
+;; (load-theme 'modus-operandi t)
 
 ;; (require 'elec-pair)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
-(custom-set-variables
- '(electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit))
+(setq electric-pair-inhibit-predicate 'electric-pair-conservative-inhibit)
 
 ;; (require 'recentf)
 (recentf-mode t)
 (add-to-list 'recentf-exclude "\\elpa")
-(custom-set-variables
- '(recentf-max-menu-items 128)
- '(recentf-max-saved-items 128))
+(setq recentf-max-menu-items 128)
+(setq recentf-max-saved-items 128)
 
 ;; (require 'dired)
-(custom-set-variables
- '(dired-recursive-deletes 'always)
- '(delete-by-moving-to-trash t))
+(setq dired-recursive-deletes 'always)
+(setq delete-by-moving-to-trash t)
 
 ;; (require 'isearch)
-(custom-set-variables
- '(isearch-lazy-count t)
- '(lazy-count-prefix-format nil)
- '(lazy-count-suffix-format " [%s/%s]"))
+(setq isearch-lazy-count t)
+(setq lazy-count-prefix-format nil)
+(setq lazy-count-suffix-format " [%s/%s]")
 
 ;; (require 'general)
 (general-create-definer general-leader-def
@@ -74,20 +69,18 @@
 
 ;; (require 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
-(custom-set-variables
- '(evil-symbol-word-search t)
- '(evil-undo-system 'undo-redo)
- '(evil-disable-insert-state-bindings t)
- '(evil-want-C-u-scroll t)
- '(evil-want-keybinding nil))
+(setq evil-symbol-word-search t)
+(setq evil-undo-system 'undo-redo)
+(setq evil-disable-insert-state-bindings t)
+(setq evil-want-C-u-scroll t)
+(setq evil-want-keybinding nil)
 (evil-mode 1)
 
 ;; (require 'vertico)
 (vertico-mode)
 
-(custom-set-variables
- '(completion-styles '(basic partial-completion orderless))
- '(completion-category-overrides '((file (styles basic partial-completion)))))
+(setq completion-styles '(basic partial-completion orderless))
+(setq completion-category-overrides '((file (styles basic partial-completion))))
 
 (require 'consult)
 (savehist-mode)
@@ -106,10 +99,9 @@
 
 ;; (require 'corfu)
 (global-corfu-mode)
-(custom-set-variables
- '(corfu-auto t)
- '(corfu-auto-prefix 2)
- '(corfu-quit-no-match 'separator))
+(setq corfu-auto t)
+(setq corfu-auto-prefix 2)
+(setq corfu-quit-no-match 'separator)
 
 ;; (require 'corfu-terminal)
 (unless (display-graphic-p)
@@ -129,31 +121,28 @@
 (setq eglot-workspace-configuration
       '((gopls
          (usePlaceholders . t))))
-(custom-set-variables
- '(eglot-events-buffer-size 0))
+(setq eglot-events-buffer-size 0)
 (general-leader-def "ca" 'eglot-code-actions)
 (general-leader-def "ci" 'eglot-code-action-organize-imports)
 (general-leader-def "cr" 'eglot-rename)
 (general-leader-def "cf" 'eglot-format)
 
 ;; (require 'go-mode)
-(custom-set-variables
- '(gofmt-command "goimports"))
+(setq gofmt-command "goimports")
 (setq go-test-args "-v -count=1")
 
 ;; (require 'org)
 ;; (require 'org-id)
 ;; (require 'ox)
 ;; (require 'org-roam)
-(custom-set-variables
- '(org-export-with-toc nil)
- '(org-html-head-include-default-style nil)
- ;; '(org-export-with-section-numbers nil)
- '(org-id-locations-file (convert-standard-filename "~/org/.org-id-locations"))
- '(org-startup-folded 'content)
- '(org-roam-directory (file-truename "~/org/"))
- '(org-roam-db-location "~/org/org-roam.db")
- '(org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag))))
+(setq org-export-with-toc nil)
+(setq org-html-head-include-default-style nil)
+;; '(org-export-with-section-numbers nil)
+(setq org-id-locations-file (convert-standard-filename "~/org/.org-id-locations"))
+(setq org-startup-folded 'content)
+(setq org-roam-directory (file-truename "~/org/"))
+(setq org-roam-db-location "~/org/org-roam.db")
+(setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 
 ;; (setq plantuml-exec-mode 'server)
