@@ -77,7 +77,8 @@
 (evil-mode 1)
 
 ;; (require 'vertico)
-(vertico-mode)
+;; (vertico-mode)
+(aggressive-completion-mode)
 
 (setq completion-styles '(basic partial-completion orderless))
 (setq completion-category-overrides '((file (styles basic partial-completion))))
@@ -97,15 +98,8 @@
 ;; (require 'avy)
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
-;; (require 'corfu)
-(global-corfu-mode)
-(setq corfu-auto t)
-(setq corfu-auto-prefix 2)
-(setq corfu-quit-no-match 'separator)
-
-;; (require 'corfu-terminal)
-(unless (display-graphic-p)
-  (corfu-terminal-mode +1))
+;; (require 'company)
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;; (require 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
@@ -159,7 +153,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(blamer org-roam yasnippet vterm-toggle vertico valign sudo-edit rust-mode plantuml-mode orderless go-tag general evil corfu-terminal avy flycheck yaml-mode protobuf-mode gotest go-impl flycheck-golangci-lint consult-flycheck))
+   '(aggressive-completion company blamer yasnippet vterm-toggle valign sudo-edit plantuml-mode orderless go-tag general evil avy flycheck protobuf-mode go-impl flycheck-golangci-lint consult-flycheck))
  '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
 
 (custom-set-faces
