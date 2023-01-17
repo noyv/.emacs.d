@@ -4,10 +4,15 @@
 
 ;; -*- lexical-binding: t -*-
 
+;; (setq force-load-messages t)
+
 ;; (require 'package)
 (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
                          ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
                          ("nongnu" . "http://mirrors.ustc.edu.cn/elpa/nongnu/")))
+
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(load custom-file)
 
 (menu-bar-mode -1)
 (setq-default tab-width 4)
@@ -28,11 +33,8 @@
 (setq split-width-threshold 0)
 (setq make-backup-files nil)
 (setq auto-save-default nil)
-;; (setq custom-safe-themes t))
 
 (add-to-list 'default-frame-alist '(font . "FiraCode-14"))
-
-;; (load-theme 'modus-operandi t)
 
 ;; (require 'elec-pair)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
@@ -77,8 +79,7 @@
 (evil-mode 1)
 
 ;; (require 'vertico)
-;; (vertico-mode)
-(aggressive-completion-mode)
+(vertico-mode)
 
 (setq completion-styles '(basic partial-completion orderless))
 (setq completion-category-overrides '((file (styles basic partial-completion))))
@@ -146,22 +147,6 @@
 ;; (org-babel-do-load-languages
 ;;  'org-babel-load-languages
 ;;  '((plantuml . t))) ; this line activates plantuml
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(aggressive-completion company blamer yasnippet vterm-toggle valign sudo-edit plantuml-mode orderless go-tag general evil avy flycheck protobuf-mode go-impl flycheck-golangci-lint consult-flycheck))
- '(pdf-view-midnight-colors '("#eeeeee" . "#000000")))
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
 
 (provide 'init)
 ;;; init.el ends here
