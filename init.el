@@ -5,6 +5,8 @@
 ;; -*- lexical-binding: t -*-
 
 ;; (setq force-load-messages t)
+(setq gc-cons-threshold most-positive-fixnum)
+(setq read-process-output-max (* 1024 1024))
 
 ;; (require 'package)
 (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
@@ -15,26 +17,30 @@
 (load custom-file)
 
 (menu-bar-mode -1)
-(setq-default tab-width 4)
-(setq-default indent-tabs-mode nil)
-(fset 'yes-or-no-p'y-or-n-p)
-(setq create-lockfiles nil)
-(setq exec-path (append exec-path '("/usr/local/go/bin/" "~/go/bin/")))
-(setenv "PATH" (concat "/usr/local/go/bin/" ":" "~/go/bin/" ":" (getenv "PATH")))
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
 (column-number-mode t)
 (global-hl-line-mode)
 
 (setq inhibit-startup-screen t)
 (setq initial-major-mode 'fundamental-mode)
 (setq initial-scratch-message nil)
-(setq split-height-threshold nil)
-(setq split-width-threshold 0)
-(setq make-backup-files nil)
-(setq auto-save-default nil)
 
 (add-to-list 'default-frame-alist '(font . "FiraCode-14"))
+(setq-default tab-width 4)
+(setq-default indent-tabs-mode nil)
+(setq split-height-threshold nil)
+(setq split-width-threshold 0)
+
+(fset 'yes-or-no-p'y-or-n-p)
+
+(setq exec-path (append exec-path '("/usr/local/go/bin/" "~/go/bin/")))
+(setenv "PATH" (concat "/usr/local/go/bin/" ":" "~/go/bin/" ":" (getenv "PATH")))
+
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+
+(setq create-lockfiles nil)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
 
 ;; (require 'elec-pair)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
@@ -68,6 +74,7 @@
 (general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
 
 (keymap-global-set "s-t" #'vterm-toggle)
+(general-leader-def "t" 'vterm-toggle)
 
 ;; (require 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
@@ -80,27 +87,28 @@
 
 ;; (require 'vertico)
 (vertico-mode)
+(keymap-set minibuffer-local-map "C-w" #'backward-kill-word)
 
 (setq completion-styles '(basic partial-completion orderless))
 (setq completion-category-overrides '((file (styles basic partial-completion))))
 
 (require 'consult)
+(consult-customize consult-ripgrep
+                   :initial (consult--async-split-initial (thing-at-point 'symbol)))
 (savehist-mode)
-
 (general-leader-def "ff" 'find-file)
 (general-leader-def "fo" 'find-file-other-window)
 (general-leader-def "fd" 'dired-jump)
 (general-leader-def "fr" 'consult-buffer)
 (general-leader-def "fe" 'consult-flycheck)
 (general-leader-def "fl" 'consult-line)
-(consult-customize consult-ripgrep
-                   :initial (consult--async-split-initial (thing-at-point 'symbol)))
 
 ;; (require 'avy)
 (general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
 
 ;; (require 'company)
-(add-hook 'after-init-hook 'global-company-mode)
+(setq company-minimum-prefix-length 2)
+(add-hook 'prog-mode-hook 'company-mode)
 
 ;; (require 'yasnippet)
 (add-hook 'prog-mode-hook 'yas-minor-mode)
@@ -110,35 +118,32 @@
 (eval-after-load 'flycheck
   '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
-;; (require 'eglot)
-(setq eglot-ignored-server-capabilites '(:documentHighlightProvider))
-(setq eglot-stay-out-of '(flymake))
-(setq eglot-workspace-configuration
-      '((gopls
-         (usePlaceholders . t))))
-(setq eglot-events-buffer-size 0)
-(general-leader-def "ca" 'eglot-code-actions)
-(general-leader-def "ci" 'eglot-code-action-organize-imports)
-(general-leader-def "cr" 'eglot-rename)
-(general-leader-def "cf" 'eglot-format)
+(setq lsp-enable-symbol-highlighting nil)
+(setq lsp-log-io nil)
+(setq lsp-enable-symbol-highlighting nil)
+(setq lsp-headerline-breadcrumb-enable nil)
+(setq lsp-lens-enable nil)
+(setq lsp-diagnostics-disabled-modes '(go-mode sh-mode))
 
 ;; (require 'go-mode)
-(setq gofmt-command "goimports")
 (setq go-test-args "-v -count=1")
 
-;; (require 'org)
-;; (require 'org-id)
-;; (require 'ox)
-;; (require 'org-roam)
-(setq org-export-with-toc nil)
-(setq org-html-head-include-default-style nil)
-;; '(org-export-with-section-numbers nil)
-(setq org-id-locations-file (convert-standard-filename "~/org/.org-id-locations"))
+;;(require 'org)
 (setq org-startup-folded 'content)
+(general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
+
+;; (require 'ox)
+(setq org-export-with-toc nil)
+;; (setq org-export-with-section-numbers nil)
+(setq org-html-head-include-default-style nil)
+
+;; (require 'org-id)
+(setq org-id-locations-file (convert-standard-filename "~/org/.org-id-locations"))
+
+;; (require 'org-roam)
 (setq org-roam-directory (file-truename "~/org/"))
 (setq org-roam-db-location "~/org/org-roam.db")
 (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-(general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 
 ;; (setq plantuml-exec-mode 'server)
 ;; (setq plantuml-server-url "http://172.16.0.201:9000")

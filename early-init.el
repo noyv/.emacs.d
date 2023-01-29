@@ -1,7 +1,7 @@
 ;;; package --- Summary
 ;;; Commentary:
 ;;; Code:
-(setq gc-cons-threshold most-positive-fixnum)
+
 (setq tool-bar-mode nil)
 (setq menu-bar-mode -1)
 (when (fboundp 'set-scroll-bar-mode)
