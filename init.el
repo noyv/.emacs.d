@@ -73,6 +73,7 @@
 (general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
 (general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
 
+;; (require 'vterm)
 (keymap-global-set "s-t" #'vterm-toggle)
 (general-leader-def "t" 'vterm-toggle)
 
@@ -84,6 +85,25 @@
 (setq evil-want-C-u-scroll t)
 (setq evil-want-keybinding nil)
 (evil-mode 1)
+
+;; (require 'xref)
+(evil-define-key 'normal xref--xref-buffer-mode-map (kbd "RET") 'xref-previous-line)
+(evil-define-key 'normal xref--xref-buffer-mode-map "j" 'xref-next-line)
+(evil-define-key 'normal xref--xref-buffer-mode-map "k" 'xref-previous-line)
+(evil-define-key 'normal xref--xref-buffer-mode-map "o" 'xref-show-location-at-point)
+
+;; (require 'package)
+(evil-set-initial-state 'package-menu-mode 'normal)
+(evil-define-key 'normal package-menu-mode-map (kbd "RET") 'package-menu-describe-package)
+(evil-define-key 'normal package-menu-mode-map "i" 'package-menu-mark-install)
+(evil-define-key 'normal package-menu-mode-map "U" 'package-menu-mark-upgrades)
+(evil-define-key 'normal package-menu-mode-map "d" 'package-menu-mark-delete)
+(evil-define-key 'normal package-menu-mode-map "gr" 'revert-buffer)
+(evil-define-key 'normal package-menu-mode-map "u" 'package-menu-mark-unmark)
+(evil-define-key 'normal package-menu-mode-map "x" 'package-menu-execute)
+
+;; (require 'avy)
+(evil-define-key '(normal motion) global-map "s" 'avy-goto-char-timer)
 
 ;; (require 'vertico)
 (vertico-mode)
@@ -103,9 +123,6 @@
 (general-leader-def "fe" 'consult-flycheck)
 (general-leader-def "fl" 'consult-line)
 
-;; (require 'avy)
-(general-def '(normal motion) global-map "s" #'avy-goto-char-timer)
-
 ;; (require 'company)
 (setq company-minimum-prefix-length 2)
 (add-hook 'prog-mode-hook 'company-mode)
@@ -118,6 +135,7 @@
 (eval-after-load 'flycheck
   '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
+;; (require 'lsp)
 (setq lsp-enable-symbol-highlighting nil)
 (setq lsp-log-io nil)
 (setq lsp-enable-symbol-highlighting nil)
@@ -127,6 +145,10 @@
 
 ;; (require 'go-mode)
 (setq go-test-args "-v -count=1")
+(add-hook 'go-mode-hook #'lsp-deferred)
+
+;; (require 'rust-mode)
+(add-hook 'rust-mode-hook #'lsp-deferred)
 
 ;;(require 'org)
 (setq org-startup-folded 'content)
