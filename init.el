@@ -14,7 +14,7 @@
                          ("nongnu" . "http://mirrors.ustc.edu.cn/elpa/nongnu/")))
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(load custom-file)
+(load custom-file t)
 
 (menu-bar-mode -1)
 (column-number-mode t)
@@ -132,8 +132,6 @@
 
 ;; (require 'flycheck)
 (add-hook 'prog-mode-hook 'flycheck-mode)
-(eval-after-load 'flycheck
-  '(add-hook 'flycheck-mode-hook #'flycheck-golangci-lint-setup))
 
 ;; (require 'lsp)
 (setq lsp-enable-symbol-highlighting nil)
@@ -141,7 +139,7 @@
 (setq lsp-enable-symbol-highlighting nil)
 (setq lsp-headerline-breadcrumb-enable nil)
 (setq lsp-lens-enable nil)
-(setq lsp-diagnostics-disabled-modes '(go-mode sh-mode))
+(setq lsp-diagnostics-disabled-modes '(sh-mode))
 
 ;; (require 'go-mode)
 (setq go-test-args "-v -count=1")
