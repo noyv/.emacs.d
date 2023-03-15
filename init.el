@@ -16,6 +16,33 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file t)
 
+(when (eq (length package-selected-packages) 0)
+  (package-refresh-contents)
+  (defvar my-packages
+    '(
+      avy
+      blamer
+      company
+      consult
+      consult-flycheck
+      evil
+      flycheck
+      general
+      go-impl
+      go-mode
+      go-tag
+      lsp-mode
+      orderless
+      plantuml-mode
+      sudo-edit
+      valign
+      vertico
+      vterm
+      vterm-toggle
+      yasnippet
+      ))
+  (mapc #'package-install my-packages))
+
 (menu-bar-mode -1)
 (column-number-mode t)
 (global-hl-line-mode)
@@ -141,26 +168,36 @@
 (setq lsp-lens-enable nil)
 (setq lsp-diagnostics-disabled-modes '(sh-mode))
 
-;; (require 'go-mode)
+;; c/c++
+(add-hook 'c-mode-hook #'lsp-deferred)
+(add-hook 'c++-mode-hook #'lsp-deferred)
+
+;; cmake
+(add-to-list 'auto-mode-alist '("\\(?:CMakeLists\\.txt\\|\\.cmake\\)\\'" . cmake-ts-mode))
+
+;; typescript
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
+(add-hook 'typescript-ts-base-mode-hook #'lsp-deferred)
+
+;; yaml
+(add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-ts-mode))
+
+;; golang
 (setq go-test-args "-v -count=1")
 (add-hook 'go-mode-hook #'lsp-deferred)
 
-;; (require 'rust-mode)
-(add-hook 'rust-mode-hook #'lsp-deferred)
+;; rust
+(add-hook 'rust-ts-mode-hook #'lsp-deferred)
 
-;;(require 'org)
+;; org
 (setq org-startup-folded 'content)
+(setq org-use-sub-superscripts nil)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
-
-;; (require 'ox)
 (setq org-export-with-toc nil)
-;; (setq org-export-with-section-numbers nil)
 (setq org-html-head-include-default-style nil)
-
-;; (require 'org-id)
 (setq org-id-locations-file (convert-standard-filename "~/org/.org-id-locations"))
-
-;; (require 'org-roam)
 (setq org-roam-directory (file-truename "~/org/"))
 (setq org-roam-db-location "~/org/org-roam.db")
 (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
