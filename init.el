@@ -5,13 +5,14 @@
 ;; -*- lexical-binding: t -*-
 
 ;; (setq force-load-messages t)
-(setq gc-cons-threshold most-positive-fixnum)
 (setq read-process-output-max (* 1024 1024))
 
 ;; (require 'package)
 (setq package-archives '(("gnu" . "http://mirrors.ustc.edu.cn/elpa/gnu/")
                          ("melpa" . "http://mirrors.ustc.edu.cn/elpa/melpa/")
                          ("nongnu" . "http://mirrors.ustc.edu.cn/elpa/nongnu/")))
+
+(setq package-selected-packages '())
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file t)
