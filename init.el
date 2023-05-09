@@ -44,7 +44,7 @@
       ))
   (mapc #'package-install my-packages))
 
-(menu-bar-mode -1)
+;; (menu-bar-mode -1)
 (column-number-mode t)
 (global-hl-line-mode)
 
@@ -115,7 +115,7 @@
 (evil-mode 1)
 
 ;; (require 'xref)
-(evil-define-key 'normal xref--xref-buffer-mode-map (kbd "RET") 'xref-previous-line)
+(evil-define-key 'normal xref--xref-buffer-mode-map (kbd "RET") 'xref-goto-xref)
 (evil-define-key 'normal xref--xref-buffer-mode-map "j" 'xref-next-line)
 (evil-define-key 'normal xref--xref-buffer-mode-map "k" 'xref-previous-line)
 (evil-define-key 'normal xref--xref-buffer-mode-map "o" 'xref-show-location-at-point)
