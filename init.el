@@ -34,6 +34,7 @@
       go-tag
       lsp-mode
       orderless
+      org-roam
       plantuml-mode
       sudo-edit
       valign
@@ -193,7 +194,7 @@
 (add-hook 'rust-ts-mode-hook #'lsp-deferred)
 
 ;; org
-(setq org-startup-folded 'content)
+(setq org-startup-folded 'showeverything)
 (setq org-use-sub-superscripts nil)
 (general-def '(normal motion) org-mode-map "TAB" #'org-cycle :keymaps 'override)
 (setq org-export-with-toc nil)
