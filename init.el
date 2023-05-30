@@ -53,7 +53,7 @@
 (setq initial-major-mode 'fundamental-mode)
 (setq initial-scratch-message nil)
 
-(add-to-list 'default-frame-alist '(font . "FiraCode-14"))
+(add-to-list 'default-frame-alist '(font . "FiraCode-12"))
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 (setq split-height-threshold nil)
@@ -117,8 +117,9 @@
 
 ;; (require 'xref)
 (evil-define-key 'normal xref--xref-buffer-mode-map (kbd "RET") 'xref-goto-xref)
-(evil-define-key 'normal xref--xref-buffer-mode-map "j" 'xref-next-line)
-(evil-define-key 'normal xref--xref-buffer-mode-map "k" 'xref-previous-line)
+(evil-define-key 'normal xref--xref-buffer-mode-map (kbd "C-<return>") 'xref-quit-and-goto-xref)
+(evil-define-key 'normal xref--xref-buffer-mode-map "]]" 'xref-next-line)
+(evil-define-key 'normal xref--xref-buffer-mode-map "[[" 'xref-prev-line)
 (evil-define-key 'normal xref--xref-buffer-mode-map "o" 'xref-show-location-at-point)
 
 ;; (require 'package)
@@ -214,4 +215,3 @@
 
 (provide 'init)
 ;;; init.el ends here
-
