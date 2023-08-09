@@ -21,8 +21,10 @@
   (package-refresh-contents)
   (defvar my-packages
     '(
+      ;; plantuml-mode
       avy
       blamer
+      buffer-name-relative
       company
       consult
       consult-flycheck
@@ -35,12 +37,9 @@
       lsp-mode
       orderless
       org-roam
-      plantuml-mode
+      popper
       sudo-edit
-      valign
       vertico
-      vterm
-      vterm-toggle
       yasnippet
       ))
   (mapc #'package-install my-packages))
@@ -67,9 +66,14 @@
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 
+(setq make-backup-files t)
+(setq backup-by-copying t)
+(setq backup-directory-alist '(("." . "~/.config/emacs/backups")))
+(setq delete-old-versions t)
+(setq version-control t)
 (setq create-lockfiles nil)
-(setq make-backup-files nil)
-(setq auto-save-default nil)
+
+(save-place-mode 1)
 
 ;; (require 'elec-pair)
 (add-hook 'prog-mode-hook #'electric-pair-mode)
@@ -102,9 +106,8 @@
 (general-leader-def "="     '(:keymap vc-prefix-map :which-key "vc"))
 (general-leader-def "p"     '(:keymap project-prefix-map :which-key "project"))
 
-;; (require 'vterm)
-(keymap-global-set "s-t" #'vterm-toggle)
-(general-leader-def "t" 'vterm-toggle)
+;; (require 'buffer-name-relative)
+(buffer-name-relative-mode)
 
 ;; (require 'evil)
 (defalias #'forward-evil-word #'forward-evil-symbol)
@@ -131,6 +134,20 @@
 (evil-define-key 'normal package-menu-mode-map "gr" 'revert-buffer)
 (evil-define-key 'normal package-menu-mode-map "u" 'package-menu-mark-unmark)
 (evil-define-key 'normal package-menu-mode-map "x" 'package-menu-execute)
+
+;; (require 'popper)
+(setq popper-reference-buffers
+      '("\\*Messages\\*"
+        "Output\\*$"
+        "\\*Async Shell Command\\*"
+        "\\*eshell\\*"
+        help-mode
+        compilation-mode))
+(keymap-global-set "M-t" 'popper-toggle-latest)
+;; (global-set-key "M-`" 'popper-cycle)
+;; (global-set-key "C-M-` 'popper-toggle-type)
+(popper-mode +1)
+(popper-echo-mode +1)
 
 ;; (require 'avy)
 (evil-define-key '(normal motion) global-map "s" 'avy-goto-char-timer)
@@ -191,9 +208,6 @@
 (setq go-test-args "-v -count=1")
 (add-hook 'go-mode-hook #'lsp-deferred)
 
-;; rust
-(add-hook 'rust-ts-mode-hook #'lsp-deferred)
-
 ;; org
 (setq org-startup-folded 'showeverything)
 (setq org-use-sub-superscripts nil)
@@ -204,14 +218,6 @@
 (setq org-roam-directory (file-truename "~/org/"))
 (setq org-roam-db-location "~/org/org-roam.db")
 (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-
-;; (setq plantuml-exec-mode 'server)
-;; (setq plantuml-server-url "http://172.16.0.201:9000")
-;; (require 'ob-plantuml)
-;; (setq org-plantuml-jar-path "~/org/plantuml.jar")
-;; (org-babel-do-load-languages
-;;  'org-babel-load-languages
-;;  '((plantuml . t))) ; this line activates plantuml
 
 (provide 'init)
 ;;; init.el ends here
